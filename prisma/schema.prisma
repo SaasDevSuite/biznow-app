@@ -1,0 +1,178 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id                 String               @id @default(cuid())
+  name               String?
+  username           String               @unique
+  password           String
+  email              String?              @unique
+  emailVerified      DateTime?            @map("email_verified")
+  image              String?
+  accounts           Account[]
+  sessions           Session[]
+  PasswordResetToken PasswordResetToken[]
+  VerificationToken  VerificationToken[]
+
+  isActive Boolean @default(false)
+  role     Role    @default(USER)
+
+  // Link to subscriptions (each user may have one or more subscriptions)
+  subscriptions Subscription[]
+  Invoice       Invoice[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  User User @relation(fields: [identifier], references: [username], onDelete: Cascade)
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  token   String   @unique
+  userId  String
+  expires DateTime
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+enum PlanStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+}
+
+enum BillingInterval {
+  MONTHLY
+  QUARTERLY
+  SEMI_ANNUAL
+  YEARLY
+}
+
+enum Currency {
+  USD
+  EUR
+  LKR
+}
+
+model Plan {
+  id           String          @id @default(cuid())
+  name         String          @unique
+  description  String?
+  price        Float // Subscription price
+  currency     Currency        @default(USD)
+  interval     BillingInterval @default(MONTHLY)
+  status       PlanStatus      @default(ACTIVE)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  Subscription Subscription[]
+
+  @@map("plans")
+}
+
+enum SubscriptionStatus {
+  PENDING // Subscription created, waiting for successful payment
+  ACTIVE // Payment verified; subscription is active
+  CANCELED
+  PAST_DUE
+  EXPIRED
+  DEACTIVATED
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId    String
+  plan      Plan               @relation(fields: [planId], references: [id])
+  status    SubscriptionStatus @default(PENDING) // Initially pending until payment verification
+  startDate DateTime? // Set only after successful payment
+  endDate   DateTime? // Calculated based on the plan's billing interval after payment
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  Invoice   Invoice[]
+
+  @@map("subscriptions")
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum PaymentMethod {
+  OTHER
+  STRIPE
+  PAYPAL
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  subscriptionId String // Must be provided to link with a Subscription
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date           DateTime // The date/time when this invoice is generated
+  amount         Float // The billing amount for this cycle
+  currency       Currency      @default(USD)
+  discount       Float         @default(0)
+  tax            Float         @default(0)
+  status         InvoiceStatus @default(PENDING) // Initially PENDING until payment is verified
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  paymentMethod PaymentMethod @default(OTHER)
+
+  @@map("invoices")
+}
