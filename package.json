@@ -34,6 +34,7 @@
     "autoprefixer": "^10.4.21",
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
+    "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -54,6 +55,9 @@
     "ts-node": "^10.9.2",
     "zod": "^3.24.2"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.0.13",
@@ -62,6 +66,7 @@
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.13.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.3.4",
@@ -71,6 +76,7 @@
     "jsdom": "^26.0.0",
     "prisma": "^6.5.0",
     "tailwindcss": "^4.0.13",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "vite-tsconfig-paths": "^5.1.4",
