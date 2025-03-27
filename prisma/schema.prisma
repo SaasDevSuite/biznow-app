@@ -178,10 +178,23 @@ model Invoice {
 }
 
 model News {
-  id      String @id @default(uuid())
+  id      String   @id @default(uuid())
   title   String
   content String
+  date    DateTime
   url     String
 
   @@map("news")
+}
+
+model SummarizedNews {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  category  String
+  sentiment String // Enum alternative: @db.Enum("Positive", "Neutral", "Negative")
+  date      DateTime
+  url       String
+
+  @@map("summarized_news")
 }
