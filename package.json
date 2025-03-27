@@ -31,12 +31,13 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "autoprefixer": "^10.4.21",
+    "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.479.0",
-    "next": "15.2.2",
+    "next": "^15.2.4",
     "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.4.6",
     "postcss": "^8.5.3",
@@ -48,6 +49,7 @@
     "stripe": "^17.7.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "ts-node": "^10.9.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -71,5 +73,8 @@
     "typescript": "^5.8.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.8"
+  },
+  "prisma": {
+    "seed": "ts-node ./prisma/seed.ts"
   }
 }
