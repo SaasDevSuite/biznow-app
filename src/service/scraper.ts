@@ -10,7 +10,7 @@ type NewsArticle = {
     date: string;
 };
 
-const FILE_PATH = path.join(process.cwd(), 'public', 'news.json'); // File location
+const FILE_PATH = path.join(process.cwd(), 'public/news-data', 'news.json'); // File location
 
 async function getFullNewsContent(url: string): Promise<NewsArticle> {
     try {
