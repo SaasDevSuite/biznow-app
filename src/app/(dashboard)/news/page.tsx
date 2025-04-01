@@ -1,8 +1,18 @@
 "use client";
 
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import Link from "next/link";
-import {ArrowDown01, ArrowUp01, BarChart3, Download, Flame, LineChart, Settings, SmilePlus} from "lucide-react";
+import {
+    ArrowDown01,
+    ArrowUp01,
+    BarChart3,
+    Download,
+    Flame,
+    LineChart,
+    Settings,
+    SmilePlus,
+    SquareArrowOutUpRight
+} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -12,6 +22,8 @@ import DonutChart, {ChartData} from "@/components/custom/donut-chart";
 import {fetchNewsItems} from "@/actions/news/query";
 import {ThemeToggle} from "@/components/theme-toggle";
 import Image from 'next/image';
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {generatePDF} from "@/utils/pdf-export";
 
 
 interface NewsItem {
@@ -27,6 +39,7 @@ export default function NewsDashboard() {
     const [city, setCity] = useState<string>("Kalutara");
     const [categoryData, setCategoryData] = useState<ChartData[]>([]);
     const [sentimentData, setSentimentData] = useState<ChartData[]>([]);
+    const dashboardRef = useRef<HTMLDivElement>(null);
 
     const frequencyData: FrequencyData[] = [
         {day: "Mon", value: 150},
@@ -94,35 +107,14 @@ export default function NewsDashboard() {
         return mapping[sentiment] || "#8884d8";
     };
 
-    // Function to export the report as CSV.
-    const handleExportReport = () => {
-        // Define the CSV header.
-        const header = ["ID", "Title", "Category", "Sentiment", "Date"];
-        // Map newsItems to CSV rows.
-        const rows = newsItems.map(item => [
-            item.id,
-            `"${item.title.replace(/"/g, '""')}"`, // escape quotes
-            item.category,
-            item.sentiment,
-            new Date(item.date).toLocaleDateString()
-        ]);
 
-        // Join header and rows.
-        const csvContent =
-            [header, ...rows]
-                .map(e => e.join(","))
-                .join("\n");
+    const handleExportPDF = async () => {
 
-        const blob = new Blob([csvContent], {type: "text/csv;charset=utf-8;"});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `news_report_${Date.now()}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        await generatePDF(
+            dashboardRef as React.RefObject<HTMLDivElement>,
+            `biznow-news-report-${new Date().toISOString().split("T")[0]}.pdf`
+        );
     };
-
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
@@ -138,10 +130,19 @@ export default function NewsDashboard() {
                     />
                     <div className="flex gap-2">
                         <ThemeToggle/>
-                        <Button onClick={handleExportReport} className="gap-2" variant="default">
-                            <Download className="h-4 w-4"/>
-                            Export Report
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="default" className="gap-2" onClick={handleExportPDF}>
+                                    <Download className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Export Report</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleExportPDF}>
+                                    Export as PDF
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <Button className="gap-2" variant="outline">
                             <Settings className="h-4 w-4"/>
                             Settings
@@ -320,7 +321,7 @@ export default function NewsDashboard() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                         <Link href={`/news/${item.id}`} className="hover:underline">
-                                            Read More
+                                            <SquareArrowOutUpRight />
                                         </Link>
                                     </td>
                                 </tr>
