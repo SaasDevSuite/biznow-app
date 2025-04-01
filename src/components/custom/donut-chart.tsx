@@ -57,7 +57,7 @@ const DonutChart: React.FC<DonutChartProps> = ({data, title}) => {
                             className="w-3 h-3 mr-2 rounded-sm"
                             style={{backgroundColor: item.color || fallbackColors[index % fallbackColors.length]}}
                         />
-                        <span className="text-white text-sm">{item.name}</span>
+                        <span className="text-sm">{item.name}</span>
                     </div>
                 ))}
             </div>
