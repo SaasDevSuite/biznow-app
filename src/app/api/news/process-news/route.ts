@@ -1,25 +1,24 @@
-import { NextResponse } from "next/server";
-import { processNews } from "@/service/news/newsProcessor";
+import { NextResponse } from 'next/server';
+import { processAllNews } from '@/actions/news/query'; // Import the function to process all news
 
-export async function POST(req: Request) {
+// Handle the API route for processing all news articles
+export async function POST() {
     try {
-        const body = await req.json();
+        // Log the start of the processing
+        console.log("🔄 Starting batch news processing...");
 
-        if (!Array.isArray(body) || body.length === 0) {
-            return NextResponse.json({ error: "Invalid request. Expected an array of news items." }, { status: 400 });
-        }
+        // Call the function to process all news items
+        await processAllNews();
 
-        // Process all news articles in parallel
-        await Promise.all(body.map(async (newsItem) => {
-            const { title, content, date, url } = newsItem;
-            if (title && content && date && url) {
-                await processNews({ title, content, date: new Date(date), url });
-            }
-        }));
-
-        return NextResponse.json({ message: "News list processed successfully" }, { status: 200 });
+        // Return a successful response once processing is complete
+        return NextResponse.json({ message: "Successfully processed all news articles." }, { status: 200 });
     } catch (error) {
-        console.error("❌ Error processing news list:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        // If there is an error, log it and return a failure response
+        console.error("❌ Error processing news:", error);
+
+        return NextResponse.json(
+            { message: "Failed to process news.", error },
+            { status: 500 }
+        );
     }
 }
