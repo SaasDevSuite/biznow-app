@@ -26,7 +26,7 @@ const DonutChart: React.FC<DonutChartProps> = ({data, title}) => {
 
     return (
         <div className="flex flex-col items-center">
-            {title && <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>}
+            {title && <h2 className="text-2xl font-bold mb-6">{title}</h2>}
             <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                     <Pie
