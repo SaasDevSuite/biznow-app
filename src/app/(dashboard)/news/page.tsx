@@ -262,8 +262,8 @@ export default function NewsDashboard() {
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardContent className="h-[300px] flex items-center justify-center">
-                            <LineCharts data={frequencyData}/>
+                        <CardContent className="flex items-center justify-center">
+                            <LineCharts title={"News Frequency"} data={frequencyData}/>
                         </CardContent>
                     </Card>
                     <Card>
