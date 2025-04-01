@@ -2,10 +2,13 @@
   "name": "core",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
+    "cron": "node --loader ts-node/esm cron.ts",
+    "start:with-cron": "next start & npm run cron",
     "lint": "next lint",
     "test": "vitest",
     "mgt:user:create": "tsx  ./bin/mgt/user-mgt.ts"
@@ -41,6 +44,7 @@
     "next": "^15.2.4",
     "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.4.6",
+    "node-cron": "^3.0.3",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -50,11 +54,10 @@
     "stripe": "^17.7.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
-    "ts-node": "^10.9.2",
     "zod": "^3.24.2"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node ./prisma/seed.ts"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -65,6 +68,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^22.13.11",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.3.4",
@@ -79,8 +83,5 @@
     "typescript": "^5.8.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.8"
-  },
-  "prisma": {
-    "seed": "ts-node ./prisma/seed.ts"
   }
 }
