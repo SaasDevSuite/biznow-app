@@ -11,6 +11,8 @@ import LineCharts, {FrequencyData} from "@/components/custom/frequency-chart";
 import DonutChart, {ChartData} from "@/components/custom/donut-chart";
 import {fetchNewsItems} from "@/actions/news/query";
 import {ThemeToggle} from "@/components/theme-toggle";
+import Image from 'next/image';
+
 
 interface NewsItem {
     id: string;
@@ -121,13 +123,21 @@ export default function NewsDashboard() {
         document.body.removeChild(link);
     };
 
+
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <header className="border-b border-border bg-background">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-foreground">Biznow</h1>
+                    <Image
+                        src="/biznow-logo.webp"
+                        alt="Biznow Logo"
+                        className="h-10"
+                        width={100}
+                        height={40}
+                        layout="intrinsic"
+                    />
                     <div className="flex gap-2">
-                        <ThemeToggle />
+                        <ThemeToggle/>
                         <Button onClick={handleExportReport} className="gap-2" variant="default">
                             <Download className="h-4 w-4"/>
                             Export Report
