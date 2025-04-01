@@ -1,15 +1,19 @@
 import { callGroqAPI } from "@/lib/groqClient";
 import { prisma } from "@/prisma";
-import { HfInference } from "@huggingface/inference"; // Hugging Face API client
+import { HfInference } from "@huggingface/inference";
+import dotenv from "dotenv";
+
+dotenv.config();
+const hf = new HfInference(process.env.HUGGING_FACE_API_KEY as string);
+if (!process.env.HUGGING_FACE_API_KEY) {
+    console.error("❌ Hugging Face API key is missing! Set it in the .env file.");
+}
 
 // Configuration constants
 const MAX_INPUT_LENGTH = 5000;
 
 // Type for embeddings to improve type safety
 type Embedding = number[];
-
-// Initialize Hugging Face client
-const hf = new HfInference("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"); // Your Hugging Face API Key
 
 
 const callGroqAPIOnce = async (prompt: string, content: string): Promise<string | null> => {
@@ -73,7 +77,7 @@ const categorizeWithKMeans = async (text: string): Promise<string | null> => {
     try {
         // Step 1: Generate text embedding
         const rawEmbedding = await hf.featureExtraction({
-            model: "sentence-transformers/all-MiniLM-L6-v2", // Lightweight embedding model
+            model: "sentence-transformers/all-MiniLM-L6-v2",
             inputs: text
         });
 
