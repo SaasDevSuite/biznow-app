@@ -27,7 +27,7 @@ const SummarizedNewsTable = () => {
     useEffect(() => {
         const fetchSummarizedNews = async () => {
             try {
-                const res = await fetch('/api/summarized-news');
+                const res = await fetch('/api/news/summarized-news');
                 if (res.ok) {
                     const data = await res.json();
                     setNewsData(data);
