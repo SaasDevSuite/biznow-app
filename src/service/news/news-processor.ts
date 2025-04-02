@@ -88,25 +88,86 @@ const categorizeWithKMeans = async (text: string): Promise<string | null> => {
         const categoryEmbeddings: Record<string, Embedding> = {
             "Technology": flattenEmbedding(await hf.featureExtraction({
                 model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Latest tech innovations, AI, software, hardware, gadgets"
+                inputs: "Latest tech innovations, AI, software, hardware, gadgets, cybersecurity, internet trends, mobile phones"
             })),
             "Business": flattenEmbedding(await hf.featureExtraction({
                 model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Corporate news, startups, finance, markets, economy"
+                inputs: "Corporate news, startups, finance, stock markets, economy, entrepreneurship, investments, banking"
             })),
             "Politics": flattenEmbedding(await hf.featureExtraction({
                 model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Government, elections, policy, international relations"
+                inputs: "Government, elections, policy, international relations, diplomacy, parliament, political debates"
             })),
             "Sports": flattenEmbedding(await hf.featureExtraction({
                 model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Athletic competitions, team sports, athletes, tournaments"
+                inputs: "Athletic competitions, team sports, athletes, tournaments, cricket, football, Olympics, eSports"
             })),
             "Entertainment": flattenEmbedding(await hf.featureExtraction({
                 model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Movies, music, celebrities, TV shows, art"
+                inputs: "Movies, music, celebrities, TV shows, art, theater, concerts, social media trends"
+            })),
+            "Health": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Medical news, public health, diseases, fitness, mental health, healthcare policies, wellness"
+            })),
+            "Science": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Research, physics, biology, chemistry, scientific discoveries, space exploration, climate science"
+            })),
+            "Finance": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Banking, stock market trends, inflation, cryptocurrencies, personal finance, fintech, investments"
+            })),
+            "Travel": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Tourism, travel destinations, adventure, hospitality, airlines, hotels, cultural experiences"
+            })),
+            "Weather": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Climate updates, natural disasters, extreme weather, storms, meteorology"
+            })),
+            "Education": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Schools, universities, scholarships, online learning, academic research, student policies"
+            })),
+            "Crime": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Law enforcement, legal cases, court rulings, fraud, cybercrime, human rights violations"
+            })),
+            "Environment": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Climate change, sustainability, conservation, pollution, renewable energy, global warming"
+            })),
+            "Startups": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Entrepreneurship, funding rounds, venture capital, startup success stories, new businesses"
+            })),
+            "Agriculture": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Farming, crops, livestock, agribusiness, food security, organic farming"
+            })),
+            "Culture & Heritage": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Traditions, historical sites, festivals, literature, art history, folk culture"
+            })),
+            "Tourism": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Travel destinations, local tourism, luxury resorts, backpacking, sightseeing"
+            })),
+            "Economy": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "GDP, inflation, taxation, trade, global economic trends, financial policies"
+            })),
+            "Social Issues": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Human rights, gender equality, social justice, poverty, protests, activism"
+            })),
+            "Other": flattenEmbedding(await hf.featureExtraction({
+                model: "sentence-transformers/all-MiniLM-L6-v2",
+                inputs: "Miscellaneous news, viral trends, memes, opinion pieces, public interest stories"
             }))
         };
+
 
         // Step 3: Calculate distances and find the closest category
         const distances = Object.entries(categoryEmbeddings).map(([category, catEmbedding]) => {
