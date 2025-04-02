@@ -1,11 +1,11 @@
 import cron from 'node-cron';
-import { scrapeAndStoreNews } from './src/service/scraper.js'; // Note the './' at the beginning and .js extension
+import { scrapeAndStoreNews } from './src/service/scraper.js';
 
 cron.schedule("* * * * *", async () => {
     console.log("Running the scraping job...");
 
     try {
-        await scrapeAndStoreNews(); // Correctly handling async function with await
+        await scrapeAndStoreNews();
         console.log("News scraping job completed!");
     } catch (error) {
         console.error("Cron job error:", error);
