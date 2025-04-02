@@ -1,6 +1,9 @@
 'use server';
 
 import { processNews } from "@/service/news/news-processor";
+import redis from "@/lib/redis";
+
+const CACHE_KEY = "summarized_news";
 
 // Utility function for delay
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -26,26 +29,32 @@ const parseDate = (dateStr: string): Date | null => {
 // Load news data dynamically from an external source
 const loadNewsData = async (): Promise<any[]> => {
     try {
-        const response = await fetch("http://localhost:3000/news-data/newsData.json");
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch news data");
+        // Check if news data exists in Redis cache
+        const cachedNews = await redis.get(CACHE_KEY);
+        if (cachedNews) {
+            console.log("🟢 Returning cached news data");
+            return JSON.parse(cachedNews);
         }
+
+        // Fetch news from API if not cached
+        const response = await fetch("http://localhost:3000/news-data/newsData.json");
+        if (!response.ok) throw new Error("Failed to fetch news data");
 
         const newsData = await response.json();
 
-        const formattedNewsData = newsData.map((newsItem: any) => {
-            const parsedDate = parseDate(newsItem.date);
-            return {
-                ...newsItem,
-                date: parsedDate, // Use Date object directly
-            };
-        });
+        const formattedNewsData = newsData.map((newsItem: any) => ({
+            ...newsItem,
+            date: parseDate(newsItem.date),
+        })).filter((item: any) => item.date !== null);
 
-        return formattedNewsData.filter((item: any) => item.date !== null); // Filter out invalid date entries
+        // Store fetched data in Redis with expiration of 1 hour
+        await redis.set(CACHE_KEY, JSON.stringify(formattedNewsData), "EX", 3600);
+        console.log("🟡 Cached news data for 1 hour");
+
+        return formattedNewsData;
     } catch (error) {
         console.error("Error loading news data:", error);
-        return []; // Return an empty array in case of error
+        return [];
     }
 };
 
@@ -60,6 +69,10 @@ export const processAllNews = async () => {
 
             await processNews(newsItem);
 
+            // Clear cache when new data is processed
+            await redis.del(CACHE_KEY);
+            console.log("🗑️ News cache invalidated");
+
             // Delay the next API call by 5 seconds (5000ms)
             await delay(5000); // Delay in milliseconds (5000ms = 5 seconds)
         } catch (error) {
@@ -70,3 +83,4 @@ export const processAllNews = async () => {
     }
 };
 
+export { loadNewsData };
