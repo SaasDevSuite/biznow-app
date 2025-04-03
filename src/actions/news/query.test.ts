@@ -1,7 +1,8 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {loadNewsData, processAllNews} from '@/actions/news/query';
+import {fetchNewsItems, loadNewsData, processAllNews} from '@/actions/news/query';
 import redis from '@/lib/redis';
 import {processNews} from '@/service/news/news-processor';
+import {prisma} from "@/prisma";
 
 // Mock the external dependencies
 vi.mock('@/lib/redis', () => ({
@@ -14,6 +15,15 @@ vi.mock('@/lib/redis', () => ({
 
 vi.mock('@/service/news/news-processor', () => ({
     processNews: vi.fn(),
+}));
+
+vi.mock("@/prisma", () => ({
+    prisma: {
+        summarizedNews: {
+            findMany: vi.fn(),
+            count: vi.fn(),
+        },
+    },
 }));
 
 describe('News Query Operations', () => {
@@ -210,6 +220,137 @@ describe('News Query Operations', () => {
 
             expect(processNews).toHaveBeenCalledTimes(1);
             expect(redis.del).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("fetchNewsItems", () => {
+        const mockNewsItems = [
+            {id: "1", title: "News 1", content: "Content 1", category: "tech", sentiment: "positive", date: new Date()},
+            {
+                id: "2",
+                title: "News 2",
+                content: "Content 2",
+                category: "sports",
+                sentiment: "neutral",
+                date: new Date()
+            },
+        ];
+
+        it("should return news items with pagination and no filters", async () => {
+            const page = 1;
+            const pageSize = 10;
+            const totalItemsCount = 15;
+
+            (prisma.summarizedNews.findMany as any).mockResolvedValue(mockNewsItems);
+            (prisma.summarizedNews.count as any).mockResolvedValue(totalItemsCount);
+
+            const result = await fetchNewsItems(page, pageSize);
+
+            expect(result).toEqual({
+                newsItems: mockNewsItems,
+                totalPages: Math.ceil(totalItemsCount / pageSize),
+            });
+
+            expect(prisma.summarizedNews.findMany).toHaveBeenCalledWith({
+                where: {},
+                skip: 0,
+                take: 10,
+                orderBy: {date: "desc"},
+            });
+        });
+
+        it("should apply search filter correctly", async () => {
+            const search = "tech";
+
+            await fetchNewsItems(1, 10, search);
+
+            expect(prisma.summarizedNews.findMany).toHaveBeenCalledWith({
+                where: {
+                    OR: [
+                        {title: {contains: search, mode: "insensitive"}},
+                        {content: {contains: search, mode: "insensitive"}},
+                    ],
+                },
+                skip: 0,
+                take: 10,
+                orderBy: {date: "desc"},
+            });
+        });
+
+        it("should apply category filter correctly", async () => {
+            const category = "tech";
+
+            await fetchNewsItems(1, 10, undefined, category);
+
+            expect(prisma.summarizedNews.findMany).toHaveBeenCalledWith({
+                where: {
+                    category: category,
+                },
+                skip: 0,
+                take: 10,
+                orderBy: {date: "desc"},
+            });
+        });
+
+        it("should apply sentiment filter correctly", async () => {
+            const sentiment = "positive";
+
+            await fetchNewsItems(1, 10, undefined, undefined, sentiment);
+
+            expect(prisma.summarizedNews.findMany).toHaveBeenCalledWith({
+                where: {
+                    sentiment: sentiment,
+                },
+                skip: 0,
+                take: 10,
+                orderBy: {date: "desc"},
+            });
+        });
+
+        it("should combine multiple filters correctly", async () => {
+            const search = "AI";
+            const category = "tech";
+            const sentiment = "neutral";
+
+            await fetchNewsItems(1, 10, search, category, sentiment);
+
+            expect(prisma.summarizedNews.findMany).toHaveBeenCalledWith({
+                where: {
+                    OR: [
+                        {title: {contains: search, mode: "insensitive"}},
+                        {content: {contains: search, mode: "insensitive"}},
+                    ],
+                    category: category,
+                    sentiment: sentiment,
+                },
+                skip: 0,
+                take: 10,
+                orderBy: {date: "desc"},
+            });
+        });
+
+        it("should calculate pagination correctly", async () => {
+            const totalItemsCount = 25;
+            const pageSize = 10;
+            (prisma.summarizedNews.count as any).mockResolvedValue(totalItemsCount);
+
+            const result = await fetchNewsItems(3, pageSize);
+            expect(result.totalPages).toBe(Math.ceil(totalItemsCount / pageSize));
+            expect(prisma.summarizedNews.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    skip: 20,
+                    take: 10,
+                })
+            );
+        });
+
+        it("should handle empty results", async () => {
+            (prisma.summarizedNews.findMany as any).mockResolvedValue([]);
+            (prisma.summarizedNews.count as any).mockResolvedValue(0);
+
+            const result = await fetchNewsItems(1, 10);
+            expect(result.newsItems).toEqual([]);
+            expect(result.totalPages).toBe(0);
         });
     });
 });
