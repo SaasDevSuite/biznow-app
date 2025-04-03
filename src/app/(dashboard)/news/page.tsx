@@ -7,6 +7,7 @@ import {
     ArrowUp01,
     BarChart3,
     Download,
+    FileText,
     Flame,
     LineChart,
     Settings,
@@ -17,14 +18,13 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import LineCharts, {FrequencyData} from "@/components/custom/frequency-chart";
 import DonutChart, {ChartData} from "@/components/custom/donut-chart";
 import {fetchNewsItems} from "@/actions/news/query";
 import {ThemeToggle} from "@/components/theme-toggle";
 import Image from 'next/image';
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {generatePDF} from "@/utils/pdf-export";
-
+import {exportAsPDF} from "@/utils/pdf-export";
 
 interface NewsItem {
     id: string;
@@ -32,6 +32,7 @@ interface NewsItem {
     category: string;
     sentiment: string;
     date: string;
+    url?: string;
 }
 
 export default function NewsDashboard() {
@@ -39,6 +40,7 @@ export default function NewsDashboard() {
     const [city, setCity] = useState<string>("Kalutara");
     const [categoryData, setCategoryData] = useState<ChartData[]>([]);
     const [sentimentData, setSentimentData] = useState<ChartData[]>([]);
+    const [isExporting, setIsExporting] = useState<boolean>(false);
     const dashboardRef = useRef<HTMLDivElement>(null);
 
     const frequencyData: FrequencyData[] = [
@@ -107,17 +109,26 @@ export default function NewsDashboard() {
         return mapping[sentiment] || "#8884d8";
     };
 
-
     const handleExportPDF = async () => {
-
-        await generatePDF(
-            dashboardRef as React.RefObject<HTMLDivElement>,
-            `biznow-news-report-${new Date().toISOString().split("T")[0]}.pdf`
-        );
+        setIsExporting(true);
+        try {
+            await exportAsPDF(newsItems, sentimentData, categoryData, frequencyData, city);
+        } finally {
+            setIsExporting(false);
+        }
     };
 
+    // const handleExportPNG = async () => {
+    //     setIsExporting(true);
+    //     try {
+    //         await exportAsPNG();
+    //     } finally {
+    //         setIsExporting(false);
+    //     }
+    // };
+
     return (
-        <div className="flex flex-col min-h-screen bg-background">
+        <div id="news-dashboard" className="flex flex-col min-h-screen bg-background" ref={dashboardRef}>
             <header className="border-b border-border bg-background">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                     <Image
@@ -130,19 +141,27 @@ export default function NewsDashboard() {
                     />
                     <div className="flex gap-2">
                         <ThemeToggle/>
+
+                        {/* Export Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="default" className="gap-2" onClick={handleExportPDF}>
-                                    <Download className="h-4 w-4" />
-                                    <span className="hidden sm:inline">Export Report</span>
+                                <Button variant="outline" className="gap-2" disabled={isExporting}>
+                                    <Download className="h-4 w-4"/>
+                                    {isExporting ? "Exporting..." : "Export"}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={handleExportPDF}>
-                                    Export as PDF
+                                <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
+                                    <FileText className="h-4 w-4 mr-2"/>
+                                    Download as PDF
                                 </DropdownMenuItem>
+                                {/*<DropdownMenuItem onClick={handleExportPNG} className="cursor-pointer">*/}
+                                {/*    <FileImage className="h-4 w-4 mr-2" />*/}
+                                {/*    Download as PNG*/}
+                                {/*</DropdownMenuItem>*/}
                             </DropdownMenuContent>
                         </DropdownMenu>
+
                         <Button className="gap-2" variant="outline">
                             <Settings className="h-4 w-4"/>
                             Settings
@@ -306,22 +325,24 @@ export default function NewsDashboard() {
                                         {item.category}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                      <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              item.sentiment === "Positive"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {item.sentiment}
-                      </span>
+                                        <span
+                                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                item.sentiment === "Positive"
+                                                    ? "bg-green-100 text-green-800"
+                                                    : item.sentiment === "Neutral"
+                                                        ? "bg-yellow-100 text-yellow-800"
+                                                        : "bg-red-100 text-red-800"
+                                            }`}
+                                        >
+                                            {item.sentiment}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                         {new Date(item.date).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                        <Link href={`/news/${item.id}`} className="hover:underline">
-                                            <SquareArrowOutUpRight />
+                                        <Link href={item.url || `/news/${item.id}`} className="hover:underline">
+                                            <SquareArrowOutUpRight/>
                                         </Link>
                                     </td>
                                 </tr>
