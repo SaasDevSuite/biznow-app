@@ -55,35 +55,49 @@ export default function NewsDashboard() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const data: NewsItem[] = await fetchNewsItems();
-            setNewsItems(data);
+            try {
+                const {newsItems} = await fetchNewsItems(1, 100);
+                const transformedNews: NewsItem[] = newsItems.map(item => ({
+                    id: item.id,
+                    title: item.title,
+                    content: item.content,
+                    category: item.category,
+                    sentiment: item.sentiment,
+                    date: item.date.toISOString().split('T')[0],
+                    url: item.url
+                }));
 
-            const categoryMap: Record<string, number> = {};
-            const sentimentMap: Record<string, number> = {};
+                setNewsItems(transformedNews);
 
-            data.forEach(item => {
-                if (item.category) {
-                    categoryMap[item.category] = (categoryMap[item.category] || 0) + 1;
-                }
-                if (item.sentiment) {
-                    sentimentMap[item.sentiment] = (sentimentMap[item.sentiment] || 0) + 1;
-                }
-            });
+                const categoryMap: Record<string, number> = {};
+                const sentimentMap: Record<string, number> = {};
 
-            const categoryArray: ChartData[] = Object.keys(categoryMap).map(key => ({
-                name: key,
-                value: categoryMap[key],
-                color: getColorForCategory(key)
-            }));
+                transformedNews.forEach(item => {
+                    if (item.category) {
+                        categoryMap[item.category] = (categoryMap[item.category] || 0) + 1;
+                    }
+                    if (item.sentiment) {
+                        sentimentMap[item.sentiment] = (sentimentMap[item.sentiment] || 0) + 1;
+                    }
+                });
 
-            const sentimentArray: ChartData[] = Object.keys(sentimentMap).map(key => ({
-                name: key,
-                value: sentimentMap[key],
-                color: getColorForSentiment(key)
-            }));
+                const categoryArray: ChartData[] = Object.keys(categoryMap).map(key => ({
+                    name: key,
+                    value: categoryMap[key],
+                    color: getColorForCategory(key)
+                }));
 
-            setCategoryData(categoryArray);
-            setSentimentData(sentimentArray);
+                const sentimentArray: ChartData[] = Object.keys(sentimentMap).map(key => ({
+                    name: key,
+                    value: sentimentMap[key],
+                    color: getColorForSentiment(key)
+                }));
+
+                setCategoryData(categoryArray);
+                setSentimentData(sentimentArray);
+            } catch (error) {
+                console.error("Failed to fetch news:", error);
+            }
         };
 
         fetchData();
