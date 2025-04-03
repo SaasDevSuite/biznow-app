@@ -1,6 +1,8 @@
 'use server';
 
 import {processNews} from "@/service/news/news-processor";
+import {prisma} from "@/prisma";
+
 import redis from "@/lib/redis";
 
 const CACHE_KEY = "summarized_news";
@@ -83,34 +85,46 @@ export const processAllNews = async () => {
     }
 };
 
-export async function fetchNewsItems() {
-    // TODO: Implement fetching logic (e.g., query a database or API)
-    return [
-        {
-            id: "1",
-            title: "Global Tech Summit Announces New AI Initiatives",
-            category: "Technology",
-            sentiment: "Positive",
-            date: "2024-02-20",
-            url: "#"
-        },
-        {
-            id: "2",
-            title: "Market Analysis: Economic Growth Surpasses Expectations",
-            category: "Economy",
-            sentiment: "Positive",
-            date: "2024-02-19",
-            url: "#"
-        },
-        {
-            id: "3",
-            title: "Climate Change Conference Yields Mixed Results",
-            category: "Environment",
-            sentiment: "Neutral",
-            date: "2024-02-18",
-            url: "#"
+export async function fetchNewsItems(
+    page: number,
+    pageSize: number,
+    search?: string,
+    category?: string,
+    sentiment?: string
+) {
+    const whereClause: any = {};
+
+    if (search) {
+        whereClause.OR = [
+            {title: {contains: search, mode: 'insensitive'}},
+            {content: {contains: search, mode: 'insensitive'}}
+        ];
+    }
+
+    if (category) {
+        whereClause.category = category;
+    }
+
+    if (sentiment) {
+        whereClause.sentiment = sentiment;
+    }
+
+    const newsItems = await prisma.summarizedNews.findMany({
+        where: whereClause,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+            date: 'desc'
         }
-    ];
+    });
+
+    const totalItems = await prisma.summarizedNews.count({
+        where: whereClause
+    });
+
+    const totalPages = Math.ceil(totalItems / pageSize);
+
+    return {newsItems, totalPages};
 }
 
 export {loadNewsData};
