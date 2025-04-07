@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { processAllNews, loadNewsData } from '@/actions/news/query';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {loadNewsData, processAllNews} from '@/actions/news/query';
 import redis from '@/lib/redis';
-import { processNews } from '@/service/news/news-processor';
+import {processNews} from '@/service/news/news-processor';
 
 // Mock the external dependencies
 vi.mock('@/lib/redis', () => ({
@@ -23,28 +23,24 @@ describe('News Query Operations', () => {
         global.fetch = vi.fn();
     });
 
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-
     describe('loadNewsData', () => {
         it('should return cached news data when available', async () => {
             const mockCachedData = [
-                { title: 'Test News', date: '2025-01-01' }, // String date as stored in cache
+                {title: 'Test News', date: '2025-01-01'},
             ];
             (redis.get as any).mockResolvedValue(JSON.stringify(mockCachedData));
 
             const result = await loadNewsData();
 
-            expect(result).toEqual(mockCachedData); // Expect the exact same structure as cached
+            expect(result).toEqual(mockCachedData);
             expect(redis.get).toHaveBeenCalledWith('summarized_news');
             expect(global.fetch).not.toHaveBeenCalled();
         });
 
         it('should fetch and cache news data when cache is empty', async () => {
             const mockNewsData = [
-                { title: 'News 1', date: '2025-01-01' },
-                { title: 'News 2', date: 'invalid-date' },
+                {title: 'News 1', date: '2025-01-01'},
+                {title: 'News 2', date: 'invalid-date'},
             ];
             (redis.get as any).mockResolvedValue(null);
             (global.fetch as any).mockResolvedValue({
@@ -84,15 +80,15 @@ describe('News Query Operations', () => {
         // Mock the delay function to resolve immediately
         beforeEach(() => {
             vi.spyOn(global, 'setTimeout').mockImplementation((fn) => {
-                fn(); // Call the callback immediately
-                return 0 as any; // Return a dummy timer ID
+                fn();
+                return 0 as any;
             });
         });
 
         it('should process all news items with delay', async () => {
             const mockNewsData = [
-                { title: 'News 1', date: '2025-01-01' },
-                { title: 'News 2', date: '2025-01-02' },
+                {title: 'News 1', date: '2025-01-01'},
+                {title: 'News 2', date: '2025-01-02'},
             ];
             (redis.get as any).mockResolvedValue(null);
             (global.fetch as any).mockResolvedValue({
@@ -105,8 +101,8 @@ describe('News Query Operations', () => {
             await processAllNews();
 
             expect(processNews).toHaveBeenCalledTimes(2);
-            expect(processNews).toHaveBeenNthCalledWith(1, expect.objectContaining({ title: 'News 1' }));
-            expect(processNews).toHaveBeenNthCalledWith(2, expect.objectContaining({ title: 'News 2' }));
+            expect(processNews).toHaveBeenNthCalledWith(1, expect.objectContaining({title: 'News 1'}));
+            expect(processNews).toHaveBeenNthCalledWith(2, expect.objectContaining({title: 'News 2'}));
             expect(redis.del).toHaveBeenCalledTimes(2);
             expect(redis.del).toHaveBeenCalledWith('summarized_news');
         });
