@@ -1,214 +1,47 @@
+import { analyzeSentiment } from '@/service/sentiment-analysis';
+import { initializeCategorizer } from '@/service/categorization';
+import { prisma } from '@/prisma';
 import { callGroqAPI } from "@/lib/groqClient";
-import { prisma } from "@/prisma";
-import { HfInference } from "@huggingface/inference";
-import dotenv from "dotenv";
 
-dotenv.config();
-const hf = new HfInference(process.env.HUGGING_FACE_API_KEY as string);
-if (!process.env.HUGGING_FACE_API_KEY) {
-    console.error("❌ Hugging Face API key is missing! Set it in the .env file.");
-}
-
-// Configuration constants
 const MAX_INPUT_LENGTH = 5000;
 
-// Type for embeddings to improve type safety
-type Embedding = number[];
+// Initialize this as null and assign it later
+let categorizerInstance: { categorizeWithKMeans: (text: string) => Promise<string | null> } | null = null;
 
-
-const callGroqAPIOnce = async (prompt: string, content: string): Promise<string | null> => {
+// Initialize immediately when the module loads
+(async () => {
     try {
-        const result = await callGroqAPI(prompt, content);
-        return result?.trim() || null;
+        categorizerInstance = await initializeCategorizer();
+        console.log("✅ Categorizer initialized successfully");
     } catch (error) {
-        console.error("❌ Groq API request failed:", error);
-        return null;
+        console.error("❌ Failed to initialize categorizer:", error);
     }
-};
+})();
 
-
-// Flatten nested array and ensure it's a 1D array of numbers
-const flattenEmbedding = (embedding: any): Embedding => {
-    const flatten = (arr: any): number[] => {
-        return arr.reduce((acc: number[], val: any) => {
-            return Array.isArray(val) ? [...acc, ...flatten(val)] : [...acc, val];
-        }, []);
-    };
-
-    return flatten(embedding);
-};
-
-// Calculate Euclidean distance between two embeddings
-const calculateEuclideanDistance = (emb1: Embedding, emb2: Embedding): number => {
-    // Ensure embeddings are of equal length, pad with zeros if needed
-    const maxLength = Math.max(emb1.length, emb2.length);
-    const padEmb1 = emb1.concat(Array(maxLength - emb1.length).fill(0));
-    const padEmb2 = emb2.concat(Array(maxLength - emb2.length).fill(0));
-
-    return Math.sqrt(
-        padEmb1.reduce((sum, val, idx) =>
-            sum + Math.pow(val - padEmb2[idx], 2), 0)
-    );
-};
-
-// Sentiment analysis using Hugging Face's API
-const analyzeSentiment = async (text: string): Promise<string> => {
-    try {
-        const result = await hf.textClassification({
-            model: "tabularisai/multilingual-sentiment-analysis",
-            inputs: text,
-        });
-
-        const label = result[0]?.label?.toLowerCase() || "neutral";
-
-        // Map all variations into 3 categories
-        if (label.includes("positive")) return "Positive";
-        if (label.includes("negative")) return "Negative";
-        return "Neutral"; // Default fallback
-    } catch (error) {
-        console.error("Error in sentiment analysis:", error);
-        return "Neutral"; // Fallback on error
-    }
-};
-
-
-// K-means Clustering Categorization using Hugging Face's embedding and clustering
-const categorizeWithKMeans = async (text: string): Promise<string | null> => {
-    try {
-        // Step 1: Generate text embedding
-        const rawEmbedding = await hf.featureExtraction({
-            model: "sentence-transformers/all-MiniLM-L6-v2",
-            inputs: text
-        });
-
-        // Flatten the embedding
-        const embedding = flattenEmbedding(rawEmbedding);
-
-        // Step 2: Use predefined category centers (you might want to adjust these)
-        const categoryEmbeddings: Record<string, Embedding> = {
-            "Technology": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Latest tech innovations, AI, software, hardware, gadgets, cybersecurity, internet trends, mobile phones"
-            })),
-            "Business": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Corporate news, startups, finance, stock markets, economy, entrepreneurship, investments, banking"
-            })),
-            "Politics": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Government, elections, policy, international relations, diplomacy, parliament, political debates"
-            })),
-            "Sports": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Athletic competitions, team sports, athletes, tournaments, cricket, football, Olympics, eSports"
-            })),
-            "Entertainment": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Movies, music, celebrities, TV shows, art, theater, concerts, social media trends"
-            })),
-            "Health": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Medical news, public health, diseases, fitness, mental health, healthcare policies, wellness"
-            })),
-            "Science": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Research, physics, biology, chemistry, scientific discoveries, space exploration, climate science"
-            })),
-            "Finance": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Banking, stock market trends, inflation, cryptocurrencies, personal finance, fintech, investments"
-            })),
-            "Travel": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Tourism, travel destinations, adventure, hospitality, airlines, hotels, cultural experiences"
-            })),
-            "Weather": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Climate updates, natural disasters, extreme weather, storms, meteorology"
-            })),
-            "Education": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Schools, universities, scholarships, online learning, academic research, student policies"
-            })),
-            "Crime": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Law enforcement, legal cases, court rulings, fraud, cybercrime, human rights violations"
-            })),
-            "Environment": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Climate change, sustainability, conservation, pollution, renewable energy, global warming"
-            })),
-            "Startups": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Entrepreneurship, funding rounds, venture capital, startup success stories, new businesses"
-            })),
-            "Agriculture": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Farming, crops, livestock, agribusiness, food security, organic farming"
-            })),
-            "Culture & Heritage": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Traditions, historical sites, festivals, literature, art history, folk culture"
-            })),
-            "Tourism": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Travel destinations, local tourism, luxury resorts, backpacking, sightseeing"
-            })),
-            "Economy": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "GDP, inflation, taxation, trade, global economic trends, financial policies"
-            })),
-            "Social Issues": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Human rights, gender equality, social justice, poverty, protests, activism"
-            })),
-            "Other": flattenEmbedding(await hf.featureExtraction({
-                model: "sentence-transformers/all-MiniLM-L6-v2",
-                inputs: "Miscellaneous news, viral trends, memes, opinion pieces, public interest stories"
-            }))
-        };
-
-
-        // Step 3: Calculate distances and find the closest category
-        const distances = Object.entries(categoryEmbeddings).map(([category, catEmbedding]) => {
-            // Calculate Euclidean distance between input embedding and category embedding
-            const distance = calculateEuclideanDistance(embedding, catEmbedding);
-            return { category, distance };
-        });
-
-        // Sort by distance and return the closest category
-        const closestCategory = distances.reduce((prev, current) =>
-            (prev.distance < current.distance) ? prev : current
-        ).category;
-
-        return closestCategory;
-    } catch (error) {
-        console.error("Error in K-means categorization:", error);
-        return null;
-    }
-};
-
-// 🟣 Full News Processor with Safety & Retry
 export const processNews = async (newsItem: { title: string; content: string; date: Date; url: string }) => {
     try {
+        // Ensure categorizer is initialized
+        if (!categorizerInstance) {
+            console.warn("⚠️ Categorizer not initialized yet, initializing now...");
+            categorizerInstance = await initializeCategorizer();
+        }
+
         const safeContent = newsItem.content.slice(0, MAX_INPUT_LENGTH);
 
-        // 🟡 Check if the news article already exists in the database
         const existingNews = await prisma.summarizedNews.findFirst({
             where: {
                 OR: [
-                    { title: newsItem.title }, // Check by title
-                    { url: newsItem.url } // Check by URL
+                    { title: newsItem.title },
+                    { url: newsItem.url }
                 ]
             }
         });
 
         if (existingNews) {
             console.warn(`⚠️ News already exists, skipping: ${newsItem.title}`);
-            return; // Skip processing if duplicate is found
+            return;
         }
 
-        // 🟡 Summarization
         let summarizedContent = safeContent;
         if (safeContent.length > 200) {
             try {
@@ -219,30 +52,35 @@ export const processNews = async (newsItem: { title: string; content: string; da
 
                     ${safeContent}
                 `;
-                const summarized = await callGroqAPIOnce(summaryPrompt, safeContent);
+                const summarized = await callGroqAPI(summaryPrompt, safeContent);
                 if (summarized) summarizedContent = summarized;
             } catch (error) {
                 console.warn("⚠️ Summarization failed, fallback to original content", error);
             }
         }
 
-        // 🟡 Categorization using K-means
         let category: string | null = null;
         try {
-            category = await categorizeWithKMeans(summarizedContent);
+            // Use the categorizer instance
+            category = await categorizerInstance.categorizeWithKMeans(summarizedContent);
         } catch (error) {
             console.warn("⚠️ Categorization failed", error);
         }
 
-        // 🟡 Sentiment Analysis using Hugging Face
         let sentiment: string | null = null;
         try {
-            sentiment = await analyzeSentiment(summarizedContent);
+            const sentimentResult = await analyzeSentiment(summarizedContent);
+            if (sentimentResult ) {
+                const label = sentimentResult.sentiment; // Assuming sentimentResult is an array
+                console.log("Sentiment result:", sentimentResult);
+                sentiment =label
+
+            }
         } catch (error) {
             console.warn("⚠️ Sentiment analysis failed", error);
         }
 
-        // ✅ Store only if both category and sentiment are successfully retrieved
+
         if (category && sentiment) {
             await prisma.summarizedNews.create({
                 data: {
@@ -256,10 +94,9 @@ export const processNews = async (newsItem: { title: string; content: string; da
             });
             console.log("✅ Processed:", newsItem.title);
         } else {
-            console.warn("⚠️ Skipped storing news due to missing category or sentiment");
+            console.warn(`⚠️ Skipped storing news due to missing category (${category}) or sentiment (${sentiment})`);
         }
     } catch (error) {
         console.error("❌ Error processing news item:", error);
     }
 };
-
