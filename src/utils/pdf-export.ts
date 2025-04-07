@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import {ChartData} from '@/components/custom/donut-chart';
 import {FrequencyData} from '@/components/custom/frequency-chart';
+import {toast} from "sonner"
 
 // Define the news item interface for type safety
 export interface NewsItem {
@@ -171,7 +172,7 @@ export const exportAsPDF = async (
         pdf.save(`News_Report_${currentDate.replace(/\//g, '-')}.pdf`);
 
     } catch (error) {
-        console.error('Error generating PDF:', error);
-        alert('Failed to generate PDF. Please try again.');
+        console.error("Error generating PDF:", error);
+        toast.error("PDF Export Failed. Please try again.");
     }
 };
