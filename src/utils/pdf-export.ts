@@ -1,41 +1,46 @@
-import jsPDF from 'jspdf';
-import {ChartData} from '@/components/custom/donut-chart';
-import {FrequencyData} from '@/components/custom/frequency-chart';
-import {toast} from "sonner"
+import { toast } from "sonner";
+import { SummarizedNews } from "@prisma/client";
+import { jsPDF } from "jspdf";
+import { ChartData } from "@/components/custom/donut-chart";
+import { FrequencyData } from "@/components/custom/frequency-chart";
 
-// Define the news item interface for type safety
-export interface NewsItem {
-    id: string;
-    title: string;
-    category: string;
-    sentiment: string;
-    date: string;
+interface DashboardData {
+    newsItems: SummarizedNews[];
+    categoryData: ChartData[];
+    sentimentData: ChartData[];
+    frequencyData: FrequencyData[];
+    city: string;
+    industryImpactScore: number;
+    competitorMentions: number;
+    positiveSentiment: number;
+    engagementRate: number;
+    lastUpdated: string;
 }
 
 // Function to get sentiment color
 const getSentimentColor = (sentiment: string): { r: number, g: number, b: number } => {
     switch (sentiment.toLowerCase()) {
         case 'positive':
-            return {r: 74, g: 222, b: 128}; // Green
+            return { r: 74, g: 222, b: 128 }; // Green
         case 'neutral':
-            return {r: 250, g: 204, b: 21}; // Yellow
+            return { r: 250, g: 204, b: 21 }; // Yellow
         case 'negative':
-            return {r: 248, g: 113, b: 113}; // Red
+            return { r: 248, g: 113, b: 113 }; // Red
         default:
-            return {r: 148, g: 163, b: 184}; // Slate
+            return { r: 148, g: 163, b: 184 }; // Slate
     }
 };
 
 // Function to get category color
 const getCategoryColor = (category: string): { r: number, g: number, b: number } => {
     const mapping: Record<string, { r: number, g: number, b: number }> = {
-        'technology': {r: 74, g: 105, b: 221},
-        'economy': {r: 144, g: 196, b: 105},
-        'environment': {r: 246, g: 198, b: 82},
-        'politics': {r: 240, g: 90, b: 90},
-        'other': {r: 94, g: 200, b: 235}
+        'technology': { r: 74, g: 105, b: 221 },
+        'economy': { r: 144, g: 196, b: 105 },
+        'environment': { r: 246, g: 198, b: 82 },
+        'politics': { r: 240, g: 90, b: 90 },
+        'other': { r: 94, g: 200, b: 235 }
     };
-    return mapping[category.toLowerCase()] || {r: 136, g: 132, b: 216}; // Default purple
+    return mapping[category.toLowerCase()] || { r: 136, g: 132, b: 216 }; // Default purple
 };
 
 // Function to generate chart summary text
@@ -63,13 +68,7 @@ const generateChartSummary = (
 };
 
 // Function to export dashboard as PDF
-export const exportAsPDF = async (
-    newsItems: NewsItem[],
-    sentimentData: ChartData[],
-    categoryData: ChartData[],
-    frequencyData: FrequencyData[],
-    city: string
-) => {
+export const exportAsPDF = async (dashboardData: DashboardData) => {
     try {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pageWidth = pdf.internal.pageSize.getWidth();
@@ -84,12 +83,12 @@ export const exportAsPDF = async (
         pdf.setFontSize(20);
         pdf.setTextColor(255, 255, 255);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Daily News Report', pageWidth / 2, 18, {align: 'center'});
+        pdf.text('Daily News Report', pageWidth / 2, 18, { align: 'center' });
 
         // Date and Location
         pdf.setFontSize(12);
         pdf.setTextColor(255, 255, 255);
-        pdf.text(`Date: ${currentDate} | Location: ${city}`, pageWidth / 2, 26, {align: 'center'});
+        pdf.text(`Date: ${currentDate} | Location: ${dashboardData.city}`, pageWidth / 2, 26, { align: 'center' });
 
         // Analytics Summary Section
         pdf.setFillColor(240, 242, 245);
@@ -101,7 +100,7 @@ export const exportAsPDF = async (
         pdf.text('Analytics Summary', 20, 45);
 
         pdf.setFont('helvetica', 'normal');
-        const summaryText = generateChartSummary(sentimentData, categoryData, frequencyData);
+        const summaryText = generateChartSummary(dashboardData.sentimentData, dashboardData.categoryData, dashboardData.frequencyData);
         pdf.setFontSize(10);
         pdf.setTextColor(50, 50, 50);
         pdf.text(pdf.splitTextToSize(summaryText, pageWidth - 40), 20, 50);
@@ -122,7 +121,7 @@ export const exportAsPDF = async (
         let yPosition = 95;
         const rowHeight = 12;
 
-        newsItems.forEach((item, index) => {
+        dashboardData.newsItems.forEach((item, index) => {
             if (yPosition > pageHeight - 20) {
                 pdf.addPage();
                 yPosition = 20;
@@ -166,7 +165,7 @@ export const exportAsPDF = async (
 
         pdf.setFontSize(8);
         pdf.setTextColor(100, 100, 100);
-        pdf.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, footerY, {align: 'center'});
+        pdf.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, footerY, { align: 'center' });
 
         // Save the PDF
         pdf.save(`News_Report_${currentDate.replace(/\//g, '-')}.pdf`);
