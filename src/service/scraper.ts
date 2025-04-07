@@ -12,7 +12,7 @@ type NewsArticle = {
 
 const FILE_PATH = path.join(process.cwd(), 'public/news-data', 'news.json'); // File location
 
-async function getFullNewsContent(url: string): Promise<NewsArticle> {
+export async function getFullNewsContent(url: string): Promise<NewsArticle> {
     try {
         const { data } = await axios.get(url);
         const $ = cheerio.load(data);
@@ -27,7 +27,6 @@ async function getFullNewsContent(url: string): Promise<NewsArticle> {
             content,
             date,
         };
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         console.error(`❌ Error fetching content for: ${url}`);
         return {

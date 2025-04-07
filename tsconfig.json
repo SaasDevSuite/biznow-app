@@ -29,14 +29,17 @@
     },
     "types": [
       "vitest",
-      "node"
+      "node",
+      "jest"
     ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "node_modules/vitest/globals.d.ts",
+    "node_modules/vitest/globals.d.ts"
   ],
   "exclude": [
     "node_modules"
