@@ -7,7 +7,6 @@ import {
     ArrowUp01,
     BarChart3,
     Download,
-    FileText,
     Flame,
     LineChart,
     Settings,
@@ -18,7 +17,6 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import LineCharts, {FrequencyData} from "@/components/custom/frequency-chart";
 import DonutChart, {ChartData} from "@/components/custom/donut-chart";
 import {fetchNewsItems} from "@/actions/news/query";
@@ -157,24 +155,10 @@ export default function NewsDashboard() {
                         <ThemeToggle/>
 
                         {/* Export Dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="gap-2" disabled={isExporting}>
-                                    <Download className="h-4 w-4"/>
-                                    {isExporting ? "Exporting..." : "Export"}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={handleExportPDF} className="cursor-pointer">
-                                    <FileText className="h-4 w-4 mr-2"/>
-                                    Download as PDF
-                                </DropdownMenuItem>
-                                {/*<DropdownMenuItem onClick={handleExportPNG} className="cursor-pointer">*/}
-                                {/*    <FileImage className="h-4 w-4 mr-2" />*/}
-                                {/*    Download as PNG*/}
-                                {/*</DropdownMenuItem>*/}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button variant="outline" className="gap-2" onClick={handleExportPDF} disabled={isExporting}>
+                            <Download className="h-4 w-4" />
+                            {isExporting ? "Exporting..." : "Export"}
+                        </Button>
 
                         <Button className="gap-2" variant="outline">
                             <Settings className="h-4 w-4"/>
