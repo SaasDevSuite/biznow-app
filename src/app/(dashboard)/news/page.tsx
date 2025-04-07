@@ -145,14 +145,14 @@ export default function NewsDashboard() {
         <div id="news-dashboard" className="flex flex-col min-h-screen bg-background" ref={dashboardRef}>
             <header className="border-b border-border bg-background">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-                    <Image
-                        src="/biznow-logo.webp"
-                        alt="Biznow Logo"
-                        className="h-10"
-                        width={100}
-                        height={40}
-                        layout="intrinsic"
-                    />
+                    <div className="relative h-10 w-24">
+                        <Image
+                            src="/biznow-logo.webp"
+                            alt="Biznow Logo"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
                     <div className="flex gap-2">
                         <ThemeToggle/>
 
