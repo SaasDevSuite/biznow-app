@@ -1,105 +1,56 @@
 "use client";
 
 import React, {useEffect, useRef, useState} from "react";
-import Link from "next/link";
-import {
-    ArrowDown01,
-    ArrowUp01,
-    BarChart3,
-    Download,
-    Flame,
-    LineChart,
-    Settings,
-    SmilePlus,
-    SquareArrowOutUpRight
-} from "lucide-react";
+import {ArrowDown01, ArrowUp01, BarChart3, Download, Flame, LineChart, Settings, SmilePlus,} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import LineCharts, {FrequencyData} from "@/components/custom/frequency-chart";
 import DonutChart, {ChartData} from "@/components/custom/donut-chart";
 import {fetchNewsItems} from "@/actions/news/query";
 import {ThemeToggle} from "@/components/theme-toggle";
-import Image from 'next/image';
+import Image from "next/image";
 import {exportAsPDF} from "@/utils/pdf-export";
+import {SummarizedNews} from "@prisma/client";
 
-interface NewsItem {
-    id: string;
-    title: string;
-    category: string;
-    sentiment: string;
-    date: string;
-    url?: string;
+interface DashboardData {
+    newsItems: SummarizedNews[];
+    categoryData: ChartData[];
+    sentimentData: ChartData[];
+    frequencyData: FrequencyData[];
+    city: string;
+    industryImpactScore: number;
+    competitorMentions: number;
+    positiveSentiment: number;
+    engagementRate: number;
+    lastUpdated: string;
 }
 
 export default function NewsDashboard() {
-    const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-    const [city, setCity] = useState<string>("Kalutara");
-    const [categoryData, setCategoryData] = useState<ChartData[]>([]);
-    const [sentimentData, setSentimentData] = useState<ChartData[]>([]);
+    const [mounted, setMounted] = useState(false);
+    const [dashboardData, setDashboardData] = useState<DashboardData>({
+        newsItems: [],
+        categoryData: [],
+        sentimentData: [],
+        frequencyData: [
+            {day: "Mon", value: 150},
+            {day: "Tue", value: 230},
+            {day: "Wed", value: 220},
+            {day: "Thu", value: 210},
+            {day: "Fri", value: 135},
+            {day: "Sat", value: 145},
+            {day: "Sun", value: 260},
+        ],
+        city: "Kalutara",
+        industryImpactScore: 85,
+        competitorMentions: 320,
+        positiveSentiment: 68,
+        engagementRate: 24.8,
+        lastUpdated: "",
+    });
+
     const [isExporting, setIsExporting] = useState<boolean>(false);
     const dashboardRef = useRef<HTMLDivElement>(null);
-
-    const frequencyData: FrequencyData[] = [
-        {day: "Mon", value: 150},
-        {day: "Tue", value: 230},
-        {day: "Wed", value: 220},
-        {day: "Thu", value: 210},
-        {day: "Fri", value: 135},
-        {day: "Sat", value: 145},
-        {day: "Sun", value: 260}
-    ];
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const {newsItems} = await fetchNewsItems(1, 100);
-                const transformedNews: NewsItem[] = newsItems.map(item => ({
-                    id: item.id,
-                    title: item.title,
-                    content: item.content,
-                    category: item.category,
-                    sentiment: item.sentiment,
-                    date: item.date.toISOString().split('T')[0],
-                    url: item.url
-                }));
-
-                setNewsItems(transformedNews);
-
-                const categoryMap: Record<string, number> = {};
-                const sentimentMap: Record<string, number> = {};
-
-                transformedNews.forEach(item => {
-                    if (item.category) {
-                        categoryMap[item.category] = (categoryMap[item.category] || 0) + 1;
-                    }
-                    if (item.sentiment) {
-                        sentimentMap[item.sentiment] = (sentimentMap[item.sentiment] || 0) + 1;
-                    }
-                });
-
-                const categoryArray: ChartData[] = Object.keys(categoryMap).map(key => ({
-                    name: key,
-                    value: categoryMap[key],
-                    color: getColorForCategory(key)
-                }));
-
-                const sentimentArray: ChartData[] = Object.keys(sentimentMap).map(key => ({
-                    name: key,
-                    value: sentimentMap[key],
-                    color: getColorForSentiment(key)
-                }));
-
-                setCategoryData(categoryArray);
-                setSentimentData(sentimentArray);
-            } catch (error) {
-                console.error("Failed to fetch news:", error);
-            }
-        };
-
-        fetchData();
-    }, []);
 
     const getColorForCategory = (category: string): string => {
         const mapping: Record<string, string> = {
@@ -107,7 +58,7 @@ export default function NewsDashboard() {
             Economy: "#90c469",
             Environment: "#f6c652",
             Politics: "#f05a5a",
-            Other: "#5ec8eb"
+            Other: "#5ec8eb",
         };
         return mapping[category] || "#8884d8";
     };
@@ -116,31 +67,79 @@ export default function NewsDashboard() {
         const mapping: Record<string, string> = {
             Positive: "#4a69dd",
             Neutral: "#90c469",
-            Negative: "#f6c652"
+            Negative: "#f6c652",
         };
         return mapping[sentiment] || "#8884d8";
     };
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const {newsItems} = await fetchNewsItems(1, 100);
+                const transformedNews: SummarizedNews[] = newsItems.map((item) => ({
+                    id: item.id,
+                    title: item.title,
+                    content: item.content,
+                    category: item.category,
+                    sentiment: item.sentiment,
+                    date: item.date,
+                    url: item.url,
+                }));
+
+                const categoryMap: Record<string, number> = {};
+                const sentimentMap: Record<string, number> = {};
+
+                transformedNews.forEach((item) => {
+                    if (item.category) {
+                        categoryMap[item.category] = (categoryMap[item.category] || 0) + 1;
+                    }
+                    if (item.sentiment) {
+                        sentimentMap[item.sentiment] = (sentimentMap[item.sentiment] || 0) + 1;
+                    }
+                });
+
+                setDashboardData((prev) => ({
+                    ...prev,
+                    newsItems: transformedNews,
+                    categoryData: Object.keys(categoryMap).map((key) => ({
+                        name: key,
+                        value: categoryMap[key],
+                        color: getColorForCategory(key),
+                    })),
+                    sentimentData: Object.keys(sentimentMap).map((key) => ({
+                        name: key,
+                        value: sentimentMap[key],
+                        color: getColorForSentiment(key),
+                    })),
+                    lastUpdated: new Date().toISOString(),
+                }));
+            } catch (error) {
+                console.error("Failed to fetch news:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
     const handleExportPDF = async () => {
         setIsExporting(true);
         try {
-            await exportAsPDF(newsItems, sentimentData, categoryData, frequencyData, city);
+            await exportAsPDF(dashboardData);
         } finally {
             setIsExporting(false);
         }
     };
 
-    // const handleExportPNG = async () => {
-    //     setIsExporting(true);
-    //     try {
-    //         await exportAsPNG();
-    //     } finally {
-    //         setIsExporting(false);
-    //     }
-    // };
-
     return (
-        <div id="news-dashboard" className="flex flex-col min-h-screen bg-background" ref={dashboardRef}>
+        <div
+            id="news-dashboard"
+            className="flex flex-col min-h-screen bg-background"
+            ref={dashboardRef}
+        >
             <header className="border-b border-border bg-background">
                 <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                     <div className="relative h-10 w-24">
@@ -151,15 +150,40 @@ export default function NewsDashboard() {
                             className="object-contain"
                         />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                        <div className="relative">
+                            <Input
+                                className="w-full bg-background pl-10"
+                                placeholder="Search news..."
+                            />
+                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="lucide lucide-search"
+                                >
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.3-4.3"/>
+                                </svg>
+                            </div>
+                        </div>
                         <ThemeToggle/>
-
-                        {/* Export Dropdown */}
-                        <Button variant="outline" className="gap-2" onClick={handleExportPDF} disabled={isExporting}>
-                            <Download className="h-4 w-4" />
+                        <Button
+                            variant="outline"
+                            className="gap-2"
+                            onClick={handleExportPDF}
+                            disabled={isExporting}
+                        >
+                            <Download className="h-4 w-4"/>
                             {isExporting ? "Exporting..." : "Export"}
                         </Button>
-
                         <Button className="gap-2" variant="outline">
                             <Settings className="h-4 w-4"/>
                             Settings
@@ -170,40 +194,12 @@ export default function NewsDashboard() {
 
             <main className="container mx-auto px-4 py-6">
                 <div className="mb-6">
-                    <p className="text-muted-foreground">Today: {new Date().toLocaleDateString()}</p>
-                </div>
-
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <Select value={city} onValueChange={setCity}>
-                        <SelectTrigger className="w-full max-w-[300px] bg-background">
-                            <SelectValue placeholder="Select City"/>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Kalutara">Kalutara</SelectItem>
-                            <SelectItem value="Panadura">Panadura</SelectItem>
-                        </SelectContent>
-                    </Select>
-
-                    <div className="relative flex-1">
-                        <Input className="w-full bg-background pl-10" placeholder="Search news..."/>
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="lucide lucide-search"
-                            >
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="m21 21-4.3-4.3"/>
-                            </svg>
-                        </div>
-                    </div>
+                    <p className="text-muted-foreground">
+                        Last Updated:{" "}
+                        {mounted
+                            ? new Date(dashboardData.lastUpdated).toLocaleString()
+                            : "Loading..."}
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -215,7 +211,9 @@ export default function NewsDashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-foreground">85/100</div>
+                            <div className="text-3xl font-bold text-foreground">
+                                {dashboardData.industryImpactScore}/100
+                            </div>
                             <div className="flex items-center mt-1 text-green-500 text-sm">
                                 <ArrowUp01 className="h-4 w-4 mr-1"/>
                                 12.5% from last month
@@ -231,7 +229,9 @@ export default function NewsDashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-foreground">320 mentions</div>
+                            <div className="text-3xl font-bold text-foreground">
+                                {dashboardData.competitorMentions} mentions
+                            </div>
                             <div className="flex items-center mt-1 text-red-500 text-sm">
                                 <ArrowDown01 className="h-4 w-4 mr-1"/>
                                 Up 12%
@@ -247,7 +247,9 @@ export default function NewsDashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-foreground">68%</div>
+                            <div className="text-3xl font-bold text-foreground">
+                                {dashboardData.positiveSentiment}%
+                            </div>
                             <div className="flex items-center mt-1 text-green-500 text-sm">
                                 <ArrowUp01 className="h-4 w-4 mr-1"/>
                                 5.3% from last month
@@ -263,7 +265,9 @@ export default function NewsDashboard() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-foreground">24.8%</div>
+                            <div className="text-3xl font-bold text-foreground">
+                                {dashboardData.engagementRate}%
+                            </div>
                             <div className="flex items-center mt-1 text-green-500 text-sm">
                                 <ArrowUp01 className="h-4 w-4 mr-1"/>
                                 2.1% from last month
@@ -275,79 +279,19 @@ export default function NewsDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                     <Card>
                         <CardContent className="flex justify-center py-4">
-                            <DonutChart title="Sentiment Analysis" data={sentimentData}/>
+                            <DonutChart title="Sentiment Analysis" data={dashboardData.sentimentData}/>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardContent className="flex items-center justify-center">
-                            <LineCharts title={"News Frequency"} data={frequencyData}/>
+                            <LineCharts title="News Frequency" data={dashboardData.frequencyData}/>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardContent className="flex justify-center py-4">
-                            <DonutChart title="Category Distribution" data={categoryData}/>
+                            <DonutChart title="Category Distribution" data={dashboardData.categoryData}/>
                         </CardContent>
                     </Card>
-                </div>
-
-                <div>
-                    <h2 className="text-xl font-semibold text-foreground mb-4">Latest News</h2>
-                    <div className="bg-background rounded-md border border-border overflow-hidden">
-                        <table className="min-w-full divide-y divide-border">
-                            <thead className="bg-muted">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Title
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Category
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Sentiment
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Read More
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                            {newsItems.map(item => (
-                                <tr key={item.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
-                                        {item.title}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                        {item.category}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                        <span
-                                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                item.sentiment === "Positive"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : item.sentiment === "Neutral"
-                                                        ? "bg-yellow-100 text-yellow-800"
-                                                        : "bg-red-100 text-red-800"
-                                            }`}
-                                        >
-                                            {item.sentiment}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                        {new Date(item.date).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                        <Link href={item.url || `/news/${item.id}`} className="hover:underline">
-                                            <SquareArrowOutUpRight/>
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </main>
         </div>
