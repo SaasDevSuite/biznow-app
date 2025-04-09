@@ -1,17 +1,23 @@
 "use client";
 
-import React, {useState} from "react";
-import {Download, Settings} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {ThemeToggle} from "@/components/theme-toggle";
+import React, { useState } from "react";
+import { Download, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/theme-toggle";
 import Image from "next/image";
-import {cn} from "@/lib/utils";
-import {NewsProvider, useNewsContext} from "@/contexts/news-context";
+import { cn } from "@/lib/utils";
+import { NewsProvider, useNewsContext } from "@/contexts/news-context";
+import { useRouter } from "next/navigation";
 
 function NewsHeader() {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const {exportReport, isExporting} = useNewsContext();
+    const { exportReport, isExporting } = useNewsContext();
+    const router = useRouter();
+
+    const handleSettingsClick = () => {
+        router.push('/news/summary');
+    };
 
     return (
         <header className="border-b border-border bg-background sticky top-0 z-10">
@@ -65,9 +71,13 @@ function NewsHeader() {
                         <Download className="h-4 w-4"/>
                         {isExporting ? "Exporting..." : "Export"}
                     </Button>
-                    <Button className="gap-2" variant="outline">
+                    <Button
+                        className="gap-2"
+                        variant="outline"
+                        onClick={handleSettingsClick}
+                    >
                         <Settings className="h-4 w-4"/>
-                        Settings
+                        News Table
                     </Button>
                 </div>
             </div>
@@ -75,7 +85,7 @@ function NewsHeader() {
     );
 }
 
-function NewsLayoutContent({children}: { children: React.ReactNode }) {
+function NewsLayoutContent({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <NewsHeader/>
