@@ -1,8 +1,8 @@
-import { toast } from "sonner";
-import { SummarizedNews } from "@prisma/client";
-import { jsPDF } from "jspdf";
-import { ChartData } from "@/components/custom/donut-chart";
-import { FrequencyData } from "@/components/custom/frequency-chart";
+import {toast} from "sonner";
+import {SummarizedNews} from "@prisma/client";
+import {jsPDF} from "jspdf";
+import {ChartData} from "@/components/custom/donut-chart";
+import {FrequencyData} from "@/components/custom/line-chart";
 
 interface DashboardData {
     newsItems: SummarizedNews[];
@@ -21,26 +21,26 @@ interface DashboardData {
 const getSentimentColor = (sentiment: string): { r: number, g: number, b: number } => {
     switch (sentiment.toLowerCase()) {
         case 'positive':
-            return { r: 74, g: 222, b: 128 }; // Green
+            return {r: 74, g: 222, b: 128}; // Green
         case 'neutral':
-            return { r: 250, g: 204, b: 21 }; // Yellow
+            return {r: 250, g: 204, b: 21}; // Yellow
         case 'negative':
-            return { r: 248, g: 113, b: 113 }; // Red
+            return {r: 248, g: 113, b: 113}; // Red
         default:
-            return { r: 148, g: 163, b: 184 }; // Slate
+            return {r: 148, g: 163, b: 184}; // Slate
     }
 };
 
 // Function to get category color
 const getCategoryColor = (category: string): { r: number, g: number, b: number } => {
     const mapping: Record<string, { r: number, g: number, b: number }> = {
-        'technology': { r: 74, g: 105, b: 221 },
-        'economy': { r: 144, g: 196, b: 105 },
-        'environment': { r: 246, g: 198, b: 82 },
-        'politics': { r: 240, g: 90, b: 90 },
-        'other': { r: 94, g: 200, b: 235 }
+        'technology': {r: 74, g: 105, b: 221},
+        'economy': {r: 144, g: 196, b: 105},
+        'environment': {r: 246, g: 198, b: 82},
+        'politics': {r: 240, g: 90, b: 90},
+        'other': {r: 94, g: 200, b: 235}
     };
-    return mapping[category.toLowerCase()] || { r: 136, g: 132, b: 216 }; // Default purple
+    return mapping[category.toLowerCase()] || {r: 136, g: 132, b: 216}; // Default purple
 };
 
 // Function to generate chart summary text
@@ -73,8 +73,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
-        const currentDate = new Date().toLocaleDateString();
-
+        const currentDate = new Date().toISOString().substring(0, 10);
         // Add header background
         pdf.setFillColor(74, 105, 221);
         pdf.rect(0, 0, pageWidth, 30, 'F');
@@ -83,12 +82,12 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         pdf.setFontSize(20);
         pdf.setTextColor(255, 255, 255);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Daily News Report', pageWidth / 2, 18, { align: 'center' });
+        pdf.text('Daily News Report', pageWidth / 2, 18, {align: 'center'});
 
         // Date and Location
         pdf.setFontSize(12);
         pdf.setTextColor(255, 255, 255);
-        pdf.text(`Date: ${currentDate} | Location: ${dashboardData.city}`, pageWidth / 2, 26, { align: 'center' });
+        pdf.text(`Date: ${currentDate} | Location: ${dashboardData.city}`, pageWidth / 2, 26, {align: 'center'});
 
         // Analytics Summary Section
         pdf.setFillColor(240, 242, 245);
@@ -165,7 +164,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
 
         pdf.setFontSize(8);
         pdf.setTextColor(100, 100, 100);
-        pdf.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, footerY, { align: 'center' });
+        pdf.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, footerY, {align: 'center'});
 
         // Save the PDF
         pdf.save(`News_Report_${currentDate.replace(/\//g, '-')}.pdf`);

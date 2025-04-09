@@ -1,7 +1,7 @@
 import React from "react";
 import {render, screen} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
-import LineCharts, {FrequencyData} from "./frequency-chart"; // Adjust import path
+import LineCharts, {FrequencyData} from "./line-chart"; // Adjust import path
 import {Area, Tooltip, XAxis, YAxis} from "recharts";
 
 vi.mock("recharts", () => ({
