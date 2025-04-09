@@ -8,15 +8,24 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { NewsProvider, useNewsContext } from "@/contexts/news-context";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 function NewsHeader() {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const { exportReport, isExporting } = useNewsContext();
     const router = useRouter();
+    const pathname = usePathname();
 
-    const handleSettingsClick = () => {
-        router.push('/news/summary');
+    // Check if we're on the news summary page
+    const isOnSummaryPage = pathname === '/news/summary';
+
+    const handleToggleView = () => {
+        // Navigate to summary page if not there, otherwise back to main news dashboard
+        if (isOnSummaryPage) {
+            router.push('/news');
+        } else {
+            router.push('/news/summary');
+        }
     };
 
     return (
@@ -33,34 +42,6 @@ function NewsHeader() {
                     </div>
                 </div>
                 <div className="flex gap-2 items-center">
-                    <div className="relative">
-                        <Input
-                            className={cn("w-full bg-background pl-10 transition-all", {
-                                "w-60": !isSearchFocused,
-                                "w-80": isSearchFocused,
-                            })}
-                            placeholder="Search news..."
-                            onFocus={() => setIsSearchFocused(true)}
-                            onBlur={() => setIsSearchFocused(false)}
-                        />
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="lucide lucide-search"
-                            >
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="m21 21-4.3-4.3"/>
-                            </svg>
-                        </div>
-                    </div>
                     <ThemeToggle/>
                     <Button
                         className="gap-2"
@@ -74,10 +55,10 @@ function NewsHeader() {
                     <Button
                         className="gap-2"
                         variant="outline"
-                        onClick={handleSettingsClick}
+                        onClick={handleToggleView}
                     >
                         <Settings className="h-4 w-4"/>
-                        News Table
+                        {isOnSummaryPage ? "News Report" : "News Summary"}
                     </Button>
                 </div>
             </div>
