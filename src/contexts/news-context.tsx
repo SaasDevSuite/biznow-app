@@ -4,7 +4,7 @@ import React, {createContext, ReactNode, useContext, useEffect, useState} from "
 import {fetchNewsItems} from "@/actions/news/query";
 import {SummarizedNews} from "@prisma/client";
 import {ChartData} from "@/components/custom/donut-chart";
-import {FrequencyData} from "@/components/custom/frequency-chart";
+import {FrequencyData} from "@/components/custom/line-chart";
 import {toast} from "sonner";
 
 export interface DashboardData {
