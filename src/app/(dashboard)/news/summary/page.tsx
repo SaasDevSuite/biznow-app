@@ -3,13 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNewsContext } from "@/contexts/news-context";
@@ -20,7 +14,7 @@ export default function NewsSummary() {
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("all");
     const [sentiment, setSentiment] = useState("all");
-    const pageSize = 10;
+    const pageSize = 8;
 
     const filteredNews = dashboardData.newsItems.filter(item => {
         const matchesSearch = search ?
@@ -55,11 +49,9 @@ export default function NewsSummary() {
 
     return (
         <div className="container mx-auto px-4 py-6">
-            <h1 className="text-2xl font-bold mb-6">News Table</h1>
-
             {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="w-full md:w-1/3">
                     <Input
                         placeholder="Search news..."
                         value={search}
@@ -67,10 +59,10 @@ export default function NewsSummary() {
                         className="w-full"
                     />
                 </div>
-                <div>
+                <div className="w-full md:w-1/3 flex flex-col md:flex-row ">
                     <Select value={category} onValueChange={handleCategoryChange}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
+                            <SelectValue placeholder="Select category"/>
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Categories</SelectItem>
@@ -81,11 +73,10 @@ export default function NewsSummary() {
                             ))}
                         </SelectContent>
                     </Select>
-                </div>
-                <div>
+                    <div className="md:mx-2" />
                     <Select value={sentiment} onValueChange={handleSentimentChange}>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select sentiment" />
+                            <SelectValue placeholder="Select sentiment"/>
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Sentiments</SelectItem>
@@ -103,7 +94,7 @@ export default function NewsSummary() {
             {isLoading ? (
                 <div className="space-y-4">
                     {Array(5).fill(0).map((_, i) => (
-                        <Skeleton key={i} className="h-16 w-full" />
+                        <Skeleton key={i} className="h-16 w-full"/>
                     ))}
                 </div>
             ) : (
