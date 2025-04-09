@@ -3,7 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {ArrowDown01, ArrowUp01, BarChart3, Flame, LineChart, SmilePlus} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import LineCharts from "@/components/custom/frequency-chart";
+import LineCharts from "@/components/custom/line-chart";
 import DonutChart from "@/components/custom/donut-chart";
 import {Skeleton} from "@/components/ui/skeleton";
 import {useNewsContext} from "@/contexts/news-context";
