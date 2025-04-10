@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, {useState} from "react";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useNewsContext } from "@/contexts/news-context";
+import {Input} from "@/components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {Button} from "@/components/ui/button";
+import {Skeleton} from "@/components/ui/skeleton";
+import {useNewsContext} from "@/contexts/news-context";
 
 export default function NewsSummary() {
-    const { dashboardData, isLoading } = useNewsContext();
+    const {dashboardData, isLoading} = useNewsContext();
     const [currentPage, setCurrentPage] = useState(1);
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState("all");
@@ -73,7 +73,7 @@ export default function NewsSummary() {
                             ))}
                         </SelectContent>
                     </Select>
-                    <div className="md:mx-2" />
+                    <div className="md:mx-2"/>
                     <Select value={sentiment} onValueChange={handleSentimentChange}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select sentiment"/>
@@ -101,43 +101,45 @@ export default function NewsSummary() {
                 <div>
                     <h2 className="text-xl font-semibold text-foreground mb-4">Latest News</h2>
                     <div className="bg-background rounded-md border border-border overflow-hidden">
-                        <table className="min-w-full divide-y divide-border">
-                            <thead className="bg-muted">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Title
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Category
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Sentiment
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Date
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                    Read More
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border">
-                            {currentItems.length === 0 ? (
+                        <div className="overflow-x-auto">
+
+                            <table className="min-w-full divide-y divide-border">
+                                <thead className="bg-muted">
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-4 text-center text-muted-foreground">
-                                        No news items found
-                                    </td>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Title
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Category
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Sentiment
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                                        Read More
+                                    </th>
                                 </tr>
-                            ) : (
-                                currentItems.map(item => (
-                                    <tr key={item.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
-                                            {item.title}
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                {currentItems.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-4 text-center text-muted-foreground">
+                                            No news items found
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                            {item.category}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                    </tr>
+                                ) : (
+                                    currentItems.map(item => (
+                                        <tr key={item.id}>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                                                {item.title}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                                {item.category}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                             <span
                                                 className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                                     item.sentiment.toLowerCase() === "positive"
@@ -149,20 +151,21 @@ export default function NewsSummary() {
                                             >
                                                 {item.sentiment}
                                             </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                            {new Date(item.date).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                            <Link href={`/news/article/${item.id}`} className="hover:underline">
-                                                Read More
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                            </tbody>
-                        </table>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                                {new Date(item.date).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                                                <Link href={`/news/article/${item.id}`} className="hover:underline">
+                                                    Read More
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}

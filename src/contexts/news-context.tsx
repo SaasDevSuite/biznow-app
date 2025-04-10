@@ -14,9 +14,9 @@ export interface DashboardData {
     frequencyData: FrequencyData[];
     city: string;
     industryImpactScore: number;
-    competitorMentions: number;
+    businessGrowthTrend: number
     positiveSentiment: number;
-    engagementRate: number;
+    regulatoryEaseScore: number;
     lastUpdated: string;
 }
 
@@ -55,9 +55,9 @@ export function NewsProvider({children}: { children: ReactNode }) {
         ],
         city: "Kalutara",
         industryImpactScore: 85,
-        competitorMentions: 320,
         positiveSentiment: 68,
-        engagementRate: 24.8,
+        businessGrowthTrend: 5,
+        regulatoryEaseScore: 65,
         lastUpdated: new Date().toISOString(),
     });
 
@@ -108,6 +108,77 @@ export function NewsProvider({children}: { children: ReactNode }) {
                     }
                 });
 
+                const totalSentiments = Object.values(sentimentMap).reduce((sum, count) => sum + count, 0);
+                const positiveSentiment = sentimentMap["Positive"]
+                    ? Math.round((sentimentMap["Positive"] / totalSentiments) * 100)
+                    : 0;
+
+                const industryKeywords = ['industry', 'market', 'economy', 'sector', 'business'];
+                let industryNewsCount = 0;
+                let industryPositiveCount = 0;
+
+                transformedNews.forEach(item => {
+                    const hasIndustryKeyword = industryKeywords.some(keyword =>
+                        item.title.toLowerCase().includes(keyword) ||
+                        item.content.toLowerCase().includes(keyword)
+                    );
+
+                    if (hasIndustryKeyword) {
+                        industryNewsCount++;
+                        if (item.sentiment === 'Positive') {
+                            industryPositiveCount++;
+                        }
+                    }
+                });
+
+                const industryImpactScore = industryNewsCount > 0
+                    ? Math.round((industryPositiveCount / industryNewsCount) * 100)
+                    : 50;
+
+                const businessOpenKeywords = ['new business', 'opening', 'launched', 'startup', 'establishment'];
+                const businessCloseKeywords = ['closed', 'shutdown', 'bankruptcy', 'closing down', 'out of business'];
+
+                let businessOpenCount = 0;
+                let businessCloseCount = 0;
+
+                transformedNews.forEach(item => {
+                    const contentLower = item.content.toLowerCase();
+                    const titleLower = item.title.toLowerCase();
+
+                    if (businessOpenKeywords.some(keyword => contentLower.includes(keyword) || titleLower.includes(keyword))) {
+                        businessOpenCount++;
+                    }
+
+                    if (businessCloseKeywords.some(keyword => contentLower.includes(keyword) || titleLower.includes(keyword))) {
+                        businessCloseCount++;
+                    }
+                });
+
+                const businessGrowthTrend = businessOpenCount - businessCloseCount;
+
+                const positiveRegKeywords = ['business friendly', 'tax break', 'incentive', 'simplified', 'support'];
+                const negativeRegKeywords = ['regulation', 'restriction', 'fine', 'penalty', 'compliance'];
+
+                let positiveRegCount = 0;
+                let negativeRegCount = 0;
+
+                transformedNews.forEach(item => {
+                    const contentLower = item.content.toLowerCase();
+                    const titleLower = item.title.toLowerCase();
+
+                    if (positiveRegKeywords.some(keyword => contentLower.includes(keyword) || titleLower.includes(keyword))) {
+                        positiveRegCount++;
+                    }
+
+                    if (negativeRegKeywords.some(keyword => contentLower.includes(keyword) || titleLower.includes(keyword))) {
+                        negativeRegCount++;
+                    }
+                });
+
+                const regulatoryEaseScore = Math.min(100, Math.max(0,
+                    50 + (positiveRegCount * 5) - (negativeRegCount * 3)
+                ));
+
                 setDashboardData((prev) => ({
                     ...prev,
                     newsItems: transformedNews,
@@ -121,6 +192,10 @@ export function NewsProvider({children}: { children: ReactNode }) {
                         value: sentimentMap[key],
                         color: getColorForSentiment(key),
                     })),
+                    positiveSentiment,
+                    industryImpactScore,
+                    businessGrowthTrend,
+                    regulatoryEaseScore,
                     lastUpdated: new Date().toISOString(),
                 }));
             } catch (error) {
