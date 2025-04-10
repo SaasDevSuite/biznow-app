@@ -1,7 +1,7 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import {ArrowDown01, ArrowUp01, BarChart3, Flame, LineChart, SmilePlus} from "lucide-react";
+import {ArrowDown01, ArrowUp01, BarChart3, Scale, SmilePlus, TrendingUp} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import LineCharts from "@/components/custom/line-chart";
 import DonutChart from "@/components/custom/donut-chart";
@@ -81,17 +81,27 @@ export default function NewsDashboard() {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                            Competitor Mentions
-                            <Flame className="h-4 w-4 text-foreground"/>
+                            Business Growth Trend
+                            <TrendingUp className="h-4 w-4 text-foreground"/>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-foreground">
-                            {dashboardData.competitorMentions} mentions
+                            {dashboardData.businessGrowthTrend > 0 ? "+" : ""}{dashboardData.businessGrowthTrend}
                         </div>
-                        <div className="flex items-center mt-1 text-red-500 text-sm">
-                            <ArrowDown01 className="h-4 w-4 mr-1"/>
-                            Up 12%
+                        <div
+                            className={`flex items-center mt-1 ${dashboardData.businessGrowthTrend >= 0 ? "text-green-500" : "text-red-500"} text-sm`}>
+                            {dashboardData.businessGrowthTrend >= 0 ? (
+                                <>
+                                    <ArrowUp01 className="h-4 w-4 mr-1"/>
+                                    More openings than closures
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowDown01 className="h-4 w-4 mr-1"/>
+                                    More closures than openings
+                                </>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -117,17 +127,27 @@ export default function NewsDashboard() {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                            Engagement Rate
-                            <LineChart className="h-4 w-4 text-foreground"/>
+                            Regulatory Ease Score
+                            <Scale className="h-4 w-4 text-foreground"/>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-foreground">
-                            {dashboardData.engagementRate}%
+                            {dashboardData.regulatoryEaseScore}/100
                         </div>
-                        <div className="flex items-center mt-1 text-green-500 text-sm">
-                            <ArrowUp01 className="h-4 w-4 mr-1"/>
-                            2.1% from last month
+                        <div
+                            className={`flex items-center mt-1 ${dashboardData.regulatoryEaseScore > 50 ? "text-green-500" : "text-red-500"} text-sm`}>
+                            {dashboardData.regulatoryEaseScore > 50 ? (
+                                <>
+                                    <ArrowUp01 className="h-4 w-4 mr-1"/>
+                                    Business-friendly environment
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowDown01 className="h-4 w-4 mr-1"/>
+                                    Challenging regulatory climate
+                                </>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
