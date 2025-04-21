@@ -6,8 +6,8 @@ import {TopNav} from "@/components/app/top-nav";
 
 
 export const metadata = {
-    title: "SaaSDevSuite user App",
-    description: "A modern, powerful and user-friendly dashboard for your SaaS/MicrosSaaS project.",
+    title: "Biznow - Dashboard",
+    description: "Business news analytics dashboard",
 };
 
 export default async function RootLayout({
