@@ -69,7 +69,7 @@ export default function NewsDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-foreground">
-                            {dashboardData.industryImpactScore}/100
+                            {dashboardData.industryImpactScore}%
                         </div>
                         <div className="flex items-center mt-1 text-green-500 text-sm">
                             <ArrowUp01 className="h-4 w-4 mr-1"/>
@@ -87,7 +87,7 @@ export default function NewsDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-foreground">
-                            {dashboardData.businessGrowthTrend > 0 ? "+" : ""}{dashboardData.businessGrowthTrend}
+                            {dashboardData.businessGrowthTrend > 0 ? "+" : ""}{dashboardData.businessGrowthTrend}%
                         </div>
                         <div
                             className={`flex items-center mt-1 ${dashboardData.businessGrowthTrend >= 0 ? "text-green-500" : "text-red-500"} text-sm`}>
@@ -133,7 +133,7 @@ export default function NewsDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-foreground">
-                            {dashboardData.regulatoryEaseScore}/100
+                            {dashboardData.regulatoryEaseScore}%
                         </div>
                         <div
                             className={`flex items-center mt-1 ${dashboardData.regulatoryEaseScore > 50 ? "text-green-500" : "text-red-500"} text-sm`}>
