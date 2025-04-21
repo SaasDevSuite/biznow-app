@@ -10,8 +10,8 @@ import {TooltipProvider} from "@/components/ui/tooltip";
 const inter = Inter({subsets: ["latin"]});
 
 export const metadata = {
-    title: "SaaSDevSuite user App",
-    description: "A modern, powerful and user-friendly dashboard for your SaaS/MicrosSaaS project.",
+    title: "Biznow - Business News Analytics",
+    description: "Business news analytics that keeps you ahead of the market",
 };
 
 
