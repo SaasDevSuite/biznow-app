@@ -156,7 +156,7 @@ export default function NewsDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <Card>
                     <CardContent className="flex justify-center py-4">
-                        <DonutChart title="Sentiment Analysis" data={dashboardData.sentimentData}/>
+                        <DonutChart title="News Tone Analysis" data={dashboardData.sentimentData}/>
                     </CardContent>
                 </Card>
                 <Card>

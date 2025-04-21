@@ -191,7 +191,7 @@ export function NewsProvider({children}: { children: ReactNode }) {
                 const totalImpact = industryNewsItems.reduce((sum, item) => sum + item.impact, 0);
 
                 const industryImpactScore = totalRelevance > 0
-                    ? Math.min(100, Math.max(0, 50 + (totalImpact / Math.sqrt(totalRelevance)) * 10))
+                    ? Math.round((Math.min(100, Math.max(0, 50 + (totalImpact / Math.sqrt(totalRelevance)) * 10)) * 100)) / 100
                     : 50;
 
                 const businessKeywords = {
