@@ -2,7 +2,7 @@
 import {ThemeToggle} from "@/components/theme-toggle"
 import {Notifications} from "@/components/notifications"
 import Link from "next/link"
-import {usePathname} from "next/navigation"
+import {usePathname, useRouter} from "next/navigation"
 import {useSettings} from "@/contexts/settings-context"
 import {
     DropdownMenu,
@@ -16,34 +16,80 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {Button} from "@/components/ui/button"
 import React from "react"
 import {signOut, useSession} from "next-auth/react"
+import Image from "next/image"
+import {BarChart2, Download, FileText, Settings} from "lucide-react"
+
+// Handle news context import safely
+let NewsContext: any;
+try {
+  NewsContext = require("@/contexts/news-context").useNewsContext;
+} catch (e) {
+  NewsContext = null;
+}
 
 export function TopNav() {
     const pathname = usePathname()
     const pathSegments = pathname.split("/").filter(Boolean)
     const {settings} = useSettings()
-    const {data: session} = useSession()
+    const session = useSession()
+    const router = useRouter()
+    
+    // Check if current path is in news section
+    const isNewsSection = pathname.startsWith('/news')
+    const isOnSummaryPage = pathname === '/news/summary'
+    
+    // Access news context for export functionality (only when in news section)
+    const newsContext = isNewsSection && NewsContext ? NewsContext() : null
 
     return (
-        <header className="sticky top-0 z-40 border-b  bg-background">
+        <header className="sticky top-0 z-40 border-b bg-background">
             <div className="flex h-16 items-center justify-between px-4 md:px-6">
-                <div className="hidden md:block">
-                    <nav className="flex items-center space-x-2">
-                        <Link href="/" className="text-sm font-medium">
-                            Home
+                <div className="flex items-center gap-4">
+                    <div className="relative h-10 w-24 hidden md:block">
+                        <Link href="/">
+                            <Image
+                                src="/biznow-logo.webp"
+                                alt="Biznow Logo"
+                                fill
+                                className="object-contain"
+                            />
                         </Link>
-                        {pathSegments.map((segment, index) => (
-                            <React.Fragment key={segment}>
-                                <span className="text-muted-foreground">/</span>
-                                <Link href={`/${pathSegments.slice(0, index + 1).join("/")}`}
-                                      className="text-sm font-medium">
-                                    {segment.charAt(0).toUpperCase() + segment.slice(1)}
-                                </Link>
-                            </React.Fragment>
-                        ))}
+                    </div>
+                    <nav className="flex items-center space-x-4">
+                        <Link href="/app" className={`text-sm font-medium ${pathname === '/app' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                            Dashboard
+                        </Link>
+                        
+                        {/* Separate buttons for News and News Summary */}
+                        <Link href="/news" className={`text-sm font-medium ${pathname === '/news' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                            News
+                        </Link>
+                        
+                        <Link href="/news/summary" className={`text-sm font-medium ${pathname === '/news/summary' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                            News Summary
+                        </Link>
+                        
+                        <Link href="/pricing" className={`text-sm font-medium ${pathname === '/pricing' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                            Pricing
+                        </Link>
                     </nav>
                 </div>
                 <div className="flex items-center gap-4">
-                    {(session?.user as any)?.role === "ADMIN" && (
+                    {/* News-specific actions - just download button */}
+                    {isNewsSection && newsContext && (
+                        <Button
+                            className="gap-2"
+                            variant="outline"
+                            size="sm"
+                            onClick={newsContext.exportReport}
+                            disabled={newsContext.isExporting}
+                        >
+                            <Download className="h-4 w-4"/>
+                            {newsContext.isExporting ? "Exporting..." : "Export Report"}
+                        </Button>
+                    )}
+                
+                    {(session?.data?.user as any)?.role === "ADMIN" && (
                         <Link href="/admin" className="text-sm font-medium">
                             Admin Dashboard
                         </Link>
@@ -55,10 +101,10 @@ export function TopNav() {
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                 <Avatar className="h-8 w-8">
                                     <AvatarImage src={settings.avatar} alt={
-                                        session?.user?.image || "User"
+                                        session?.data?.user?.image || "User"
                                     }/>
                                     <AvatarFallback>
-                                        {(session?.user?.name || "User")
+                                        {(session?.data?.user?.name || "User")
                                             .split(" ")
                                             .map((n) => n[0])
                                             .join("")}
@@ -70,7 +116,7 @@ export function TopNav() {
                             <DropdownMenuLabel className="font-normal">
                                 <div className="flex flex-col space-y-1">
                                     <p className="text-sm font-medium leading-none">{
-                                        session?.user?.name || "User"
+                                        session?.data?.user?.name || "User"
                                     }</p>
                                 </div>
                             </DropdownMenuLabel>
