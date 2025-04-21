@@ -115,9 +115,9 @@ describe('PDF Export Functionality', () => {
       ],
       city: 'Test City',
       industryImpactScore: 75,
-      competitorMentions: 42,
       positiveSentiment: 65,
-      engagementRate: 23.5,
+      regulatoryEaseScore: 65.75,
+      businessGrowthTrend: 5,
       lastUpdated: '2023-01-03T12:00:00Z',
     };
   });
@@ -141,11 +141,31 @@ describe('PDF Export Functionality', () => {
       expect(mockPdf.setFontSize).toHaveBeenCalledWith(24);
       expect(mockPdf.setTextColor).toHaveBeenCalledWith(255, 255, 255);
       expect(mockPdf.setFont).toHaveBeenCalledWith('helvetica', 'bold');
-      expect(mockPdf.text).toHaveBeenCalledWith(expect.any(String), expect.any(Number), 20, {align: 'center'});
+      expect(mockPdf.text).toHaveBeenCalledWith('News Intelligence Report', expect.any(Number), 20, {align: 'center'});
 
       expect(mockPdf.setFontSize).toHaveBeenCalledWith(10);
       expect(mockPdf.setTextColor).toHaveBeenCalledWith(220, 220, 220);
       expect(mockPdf.setFont).toHaveBeenCalledWith('helvetica', 'normal');
+    });
+
+    it('should add all metric boxes with correct data', async () => {
+      await exportAsPDF(mockDashboardData);
+
+      // Verify Industry Impact Score
+      expect(mockPdf.text).toHaveBeenCalledWith('Industry Impact Score', expect.any(Number), expect.any(Number));
+      expect(mockPdf.text).toHaveBeenCalledWith("75/100", expect.any(Number), expect.any(Number));
+
+      // Verify Business Growth Trend
+      expect(mockPdf.text).toHaveBeenCalledWith('Business Growth Trend', expect.any(Number), expect.any(Number));
+      expect(mockPdf.text).toHaveBeenCalledWith("+5", expect.any(Number), expect.any(Number));
+
+      // Verify Positive Sentiment
+      expect(mockPdf.text).toHaveBeenCalledWith('Positive Sentiment', expect.any(Number), expect.any(Number));
+      expect(mockPdf.text).toHaveBeenCalledWith("65%", expect.any(Number), expect.any(Number));
+
+      // Verify Regulatory Ease Score
+      expect(mockPdf.text).toHaveBeenCalledWith('Regulatory Ease Score', expect.any(Number), expect.any(Number));
+      expect(mockPdf.text).toHaveBeenCalledWith("65.75/100", expect.any(Number), expect.any(Number));
     });
 
     it('should add section title for charts with proper styling', async () => {
@@ -225,7 +245,7 @@ describe('PDF Export Functionality', () => {
       await exportAsPDF(mockDashboardData);
 
       // Verify PDF was saved with correct filename
-      expect(mockPdf.save).toHaveBeenCalledWith(expect.stringContaining(currentDate.replace(/\//g, '-')));
+      expect(mockPdf.save).toHaveBeenCalledWith(`News_Intelligence_Report_${currentDate.replace(/\//g, '-')}.pdf`);
     });
 
     it('should handle errors during PDF creation gracefully', async () => {
