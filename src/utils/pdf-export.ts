@@ -296,7 +296,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         pdf.setFontSize(24);
         pdf.setTextColor(255, 255, 255);
         pdf.setFont('helvetica', 'bold');
-        pdf.text('Daily News Report', pageWidth / 2, 20, {align: 'center'});
+        pdf.text('News Intelligence Report', pageWidth / 2, 20, {align: 'center'});
 
         // Date only (removed location)
         pdf.setFontSize(10);
@@ -316,7 +316,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         drawMetricBox(
             pdf,
             'Industry Impact Score',
-            `${dashboardData.industryImpactScore}%`,
+            `${dashboardData.industryImpactScore.toFixed(2)}%`,
             {r: 74, g: 105, b: 221},
             margin,
             yPosition,
@@ -324,11 +324,11 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
             metricHeight
         );
 
-        // Competitor Mentions
+        // Business Growth Trend
         drawMetricBox(
             pdf,
-            'Competitor Mentions',
-            dashboardData.competitorMentions.toString(),
+            'Business Growth Trend',
+            `${dashboardData.businessGrowthTrend > 0 ? "+" : ""}${dashboardData.businessGrowthTrend}%`,
             {r: 144, g: 196, b: 105},
             margin + metricWidth + metricSpacing,
             yPosition,
@@ -351,11 +351,11 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
             metricHeight
         );
 
-        // Engagement Rate
+        // Regulatory Ease Score
         drawMetricBox(
             pdf,
-            'Engagement Rate',
-            `${dashboardData.engagementRate}%`,
+            'Regulatory Ease Score',
+            `${dashboardData.regulatoryEaseScore.toFixed(2)}%`,
             {r: 246, g: 198, b: 82},
             margin + metricWidth + metricSpacing,
             yPosition,
@@ -440,7 +440,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         pdf.setPage(1);
 
         // Save the PDF
-        pdf.save(`Today's_News_Report_${currentDate.replace(/\//g, '-')}.pdf`);
+        pdf.save(`News_Intelligence_Report_${currentDate.replace(/\//g, '-')}.pdf`);
 
     } catch (error) {
         console.error("Error generating PDF:", error);
