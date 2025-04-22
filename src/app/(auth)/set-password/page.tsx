@@ -1,17 +1,19 @@
 "use client"
 
-import {useState} from "react"
+import React, {useState} from "react"
 import Link from "next/link"
 import {useRouter} from "next/navigation"
 import {zodResolver} from "@hookform/resolvers/zod"
 import {useForm} from "react-hook-form"
 import {z} from "zod"
+import { useCursorAnimation } from "@/hooks/useCursorAnimation";
 
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form"
 import {Input} from "@/components/ui/input"
 import {toast} from "sonner";
+import {ThemeToggle} from "@/components/theme-toggle";
 
 const formSchema = z
     .object({
@@ -54,11 +56,25 @@ export default function SetPasswordPage() {
         }
     }
 
+    useCursorAnimation();
+
     return (
-        <div className="flex min-h-screen items-center justify-center px-4 py-12">
+        <div className="animated-bg flex min-h-screen items-center justify-center px-4 py-12 relative overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 z-0 bg-gradient-radial opacity-0 transition-opacity duration-300" id="cursor-bg"></div>
+            <div
+                id="cursor-bg"
+                className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-500 ease-out"
+                style={{ background: "transparent" }}
+            ></div>
+            <div className="absolute right-5 top-5"><ThemeToggle/></div>
             <Card className="w-full max-w-md">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold">Set new password</CardTitle>
+                    <CardTitle
+                        role="heading"
+                        className="text-center text-3xl font-bold text-[#624bfa] drop-shadow-md transition-all duration-300 hover:scale-105"
+                    >
+                        Set new password
+                    </CardTitle>
                     <CardDescription>Create a new password for your account</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -90,7 +106,11 @@ export default function SetPasswordPage() {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full" disabled={isLoading}>
+                            <Button
+                                type="submit"
+                                className="w-full bg-[#624bfa] hover:bg-[#513dd1] text-white"
+                                disabled={isLoading}
+                            >
                                 {isLoading ? "Updating password..." : "Update password"}
                             </Button>
                         </form>
