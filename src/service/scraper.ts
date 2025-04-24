@@ -323,7 +323,7 @@ async function callGroqLLMService(text: string, url: string, source: string, api
 }
 
 export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: number = 10) {
-    const FILE_PATH = path.join(process.cwd(), `public/news-data/${config.name}_news_data.json`);
+    const FILE_PATH = path.join(process.cwd(), `public/news-data/newsData.json`);
     const articles: NewsArticle[] = [];
     const seen = new Set<string>();
 
@@ -413,5 +413,5 @@ export async function scrapeAndStoreNews() {
         articleSelector: "article"
     };
 
-    return await scrapeAndProcessNews(deranaConfig, 100);
+    return await scrapeAndProcessNews(meepuraConfig, 100);
 }
