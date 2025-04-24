@@ -1,10 +1,8 @@
-// src/service/scraper.ts
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import fs from 'fs';
 import path from 'path';
 
-// Define the structure for news articles
 export interface NewsArticle {
     title: string;
     content: string;
@@ -14,7 +12,6 @@ export interface NewsArticle {
     source: string;
 }
 
-// Define a site configuration interface
 interface SiteConfig {
     name: string;
     baseUrl: string;
@@ -22,14 +19,12 @@ interface SiteConfig {
     articleSelector?: string;
 }
 
-// Rate limiting configuration
 interface RateLimitConfig {
     tokensPerMinute: number;
     tokensUsed: number;
     resetTime: number;
 }
 
-// Global rate limit tracking
 const rateLimitState: RateLimitConfig = {
     tokensPerMinute: 6000,
     tokensUsed: 0,
@@ -53,7 +48,7 @@ async function extractWithLLM(html: string, url: string, source: string): Promis
         return {
             title: "Error extracting title",
             content: "Error extracting content",
-            date: new Date().toISOString().split('T')[0], // Current date as fallback
+            date: new Date().toISOString().split('T')[0],
             rawDate: "Error extracting date",
             url,
             source
@@ -298,8 +293,6 @@ async function callGroqLLMService(text: string, url: string, source: string, api
 
     let parsedResult;
     try {
-        // Handle potential JSON formatting issues
-        // Sometimes LLMs might add backticks or other text around the JSON
         const jsonMatch = result.match(/\{[\s\S]*\}/);
         const jsonStr = jsonMatch ? jsonMatch[0] : result;
         parsedResult = JSON.parse(jsonStr);
@@ -338,7 +331,7 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
         let articlesProcessed = 0;
 
         for (const link of links) {
-            // Check if we've reached the limit
+            // Check whether the limit reached
             if (articlesProcessed >= maxArticles) {
                 console.log(`Reached maximum of ${maxArticles} articles for ${config.name}`);
                 break;
@@ -360,7 +353,6 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
                         articleHtml = $article(config.articleSelector).html() || articleData;
                     }
 
-                    // Process with LLM
                     const processedArticle = await extractWithLLM(articleHtml, absoluteUrl, config.name);
                     articles.push(processedArticle);
 
