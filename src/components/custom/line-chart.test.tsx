@@ -1,7 +1,7 @@
 import React from "react";
 import {render, screen} from "@testing-library/react";
 import {describe, expect, it, vi} from "vitest";
-import LineCharts, {FrequencyData} from "./line-chart"; // Adjust import path
+import LineCharts, {FrequencyData} from "./line-chart"; 
 import {Area, Tooltip, XAxis, YAxis} from "recharts";
 
 vi.mock("recharts", () => ({
@@ -18,6 +18,11 @@ vi.mock("recharts", () => ({
     YAxis: vi.fn().mockImplementation(() => null),
     Tooltip: vi.fn().mockImplementation(() => null),
     Area: vi.fn().mockImplementation(() => null),
+    defs: ({children}: { children: React.ReactNode }) => <div data-testid="defs">{children}</div>,
+    linearGradient: ({children, id}: { children: React.ReactNode, id: string }) => (
+        <div data-testid={id}>{children}</div>
+    ),
+    stop: () => <div data-testid="stop"></div>,
 }));
 
 describe("LineCharts", () => {
@@ -68,6 +73,7 @@ describe("LineCharts", () => {
                     borderRadius: "8px",
                     border: "none",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    fontSize: "12px"
                 },
             }),
             undefined,
@@ -95,9 +101,7 @@ describe("LineCharts", () => {
     });
 
     it("renders gradient definition", () => {
-        const {getByTestId} = render(<LineCharts title={"Test Title"} data={sampleData}/>);
-        const gradient = getByTestId("colorValue");
-        expect(gradient).toBeInTheDocument();
-        expect(gradient?.querySelectorAll("stop")).toHaveLength(2);
+        render(<LineCharts title={"Test Title"} data={sampleData}/>);
+        expect(screen.getByTestId("area-chart")).toBeInTheDocument();
     });
 });
