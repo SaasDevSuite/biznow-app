@@ -1,6 +1,6 @@
 'use server';
 
-import {processNews} from "@/service/news/news-processor";
+import {processNews} from "@/actions/news/operations";
 import {prisma} from "@/prisma";
 
 import redis from "@/lib/redis";

@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {fetchNewsItems, loadNewsData, processAllNews} from '@/actions/news/query';
 import redis from '@/lib/redis';
-import {processNews} from '@/service/news/news-processor';
+import {processNews} from '@/actions/news/operations';
 import {prisma} from "@/prisma";
 
 // Mock the external dependencies
