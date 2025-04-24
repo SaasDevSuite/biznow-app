@@ -153,19 +153,19 @@ export default function NewsDashboard() {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
                 <Card>
-                    <CardContent className="flex justify-center py-4">
+                    <CardContent className="p-3 flex justify-center">
                         <DonutChart title="News Tone Analysis" data={dashboardData.sentimentData}/>
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardContent className="flex items-center justify-center">
+                    <CardContent className="p-3 flex items-center justify-center">
                         <LineCharts title="News Frequency" data={dashboardData.frequencyData}/>
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardContent className="flex justify-center py-4">
+                    <CardContent className="p-3 flex justify-center">
                         <DonutChart title="Category Distribution" data={dashboardData.categoryData}/>
                     </CardContent>
                 </Card>
