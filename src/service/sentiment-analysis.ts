@@ -1,5 +1,8 @@
-import { SentimentAnalyzer, PorterStemmer, WordTokenizer } from 'natural';
+// import { SentimentAnalyzer, PorterStemmer, WordTokenizer } from 'natural';
 import { removeStopwords } from 'stopword';
+
+import pkg from 'natural';
+const { SentimentAnalyzer, PorterStemmer, WordTokenizer } = pkg;
 
 // Function for sentiment analysis using the natural library
 export function getSentiment(text: string) {
