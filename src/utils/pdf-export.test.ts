@@ -153,11 +153,11 @@ describe('PDF Export Functionality', () => {
 
       // Verify Industry Impact Score
       expect(mockPdf.text).toHaveBeenCalledWith('Industry Impact Score', expect.any(Number), expect.any(Number));
-      expect(mockPdf.text).toHaveBeenCalledWith("75/100", expect.any(Number), expect.any(Number));
+      expect(mockPdf.text).toHaveBeenCalledWith("75.00%", expect.any(Number), expect.any(Number));
 
       // Verify Business Growth Trend
       expect(mockPdf.text).toHaveBeenCalledWith('Business Growth Trend', expect.any(Number), expect.any(Number));
-      expect(mockPdf.text).toHaveBeenCalledWith("+5", expect.any(Number), expect.any(Number));
+      expect(mockPdf.text).toHaveBeenCalledWith("+5%", expect.any(Number), expect.any(Number));
 
       // Verify Positive Sentiment
       expect(mockPdf.text).toHaveBeenCalledWith('Positive Sentiment', expect.any(Number), expect.any(Number));
@@ -165,7 +165,7 @@ describe('PDF Export Functionality', () => {
 
       // Verify Regulatory Ease Score
       expect(mockPdf.text).toHaveBeenCalledWith('Regulatory Ease Score', expect.any(Number), expect.any(Number));
-      expect(mockPdf.text).toHaveBeenCalledWith("65.75/100", expect.any(Number), expect.any(Number));
+      expect(mockPdf.text).toHaveBeenCalledWith("65.75%", expect.any(Number), expect.any(Number));
     });
 
     it('should add section title for charts with proper styling', async () => {
