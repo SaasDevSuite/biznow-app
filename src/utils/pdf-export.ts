@@ -316,7 +316,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         drawMetricBox(
             pdf,
             'Industry Impact Score',
-            `75/100`,
+            `${dashboardData.industryImpactScore.toFixed(2)}%`,
             {r: 74, g: 105, b: 221},
             margin,
             yPosition,
@@ -328,7 +328,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         drawMetricBox(
             pdf,
             'Business Growth Trend',
-            `+5`,
+            `${dashboardData.businessGrowthTrend > 0 ? "+" : ""}${dashboardData.businessGrowthTrend}%`,
             {r: 144, g: 196, b: 105},
             margin + metricWidth + metricSpacing,
             yPosition,
@@ -355,7 +355,7 @@ export const exportAsPDF = async (dashboardData: DashboardData) => {
         drawMetricBox(
             pdf,
             'Regulatory Ease Score',
-            `65.75/100`,
+            `${dashboardData.regulatoryEaseScore.toFixed(2)}%`,
             {r: 246, g: 198, b: 82},
             margin + metricWidth + metricSpacing,
             yPosition,
