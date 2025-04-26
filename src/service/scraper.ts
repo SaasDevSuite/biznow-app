@@ -1,7 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import fs from 'fs';
-import path from 'path';
+import { PrismaClient } from '@prisma/client';
 
 export interface NewsArticle {
     title: string;
@@ -31,6 +30,8 @@ const rateLimitState: RateLimitConfig = {
     resetTime: Date.now() + 60000
 };
 
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
 async function extractWithLLM(html: string, url: string, source: string): Promise<NewsArticle> {
     try {
@@ -315,8 +316,8 @@ async function callGroqLLMService(text: string, url: string, source: string, api
     };
 }
 
+// Modified function to save to Prisma instead of JSON
 export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: number = 10) {
-    const FILE_PATH = path.join(process.cwd(), `public/news-data/newsData.json`);
     const articles: NewsArticle[] = [];
     const seen = new Set<string>();
 
@@ -356,33 +357,22 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
                     const processedArticle = await extractWithLLM(articleHtml, absoluteUrl, config.name);
                     articles.push(processedArticle);
 
+                    // Save each article to the database as it's processed
+                    await saveArticleToDB(processedArticle);
+
                     articlesProcessed++;
-                    console.log(`Successfully processed article ${articlesProcessed} from ${config.name}`);
+                    console.log(`Successfully processed and saved article ${articlesProcessed} from ${config.name}`);
 
                     // Add a larger delay between articles to help with rate limiting
                     await sleep(2500);
                 } catch (error) {
                     console.error(`Error processing article ${absoluteUrl}:`, error);
-
-                    // Save partial results after errors
-                    if (articles.length > 0) {
-                        fs.writeFileSync(FILE_PATH, JSON.stringify(articles, null, 2), 'utf-8');
-                        console.log(`✅ Partial news data saved to JSON file for ${config.name}:`, FILE_PATH);
-                    }
-
                     await sleep(5000);
                 }
             }
         }
 
-        if (articles.length > 0) {
-            fs.writeFileSync(FILE_PATH, JSON.stringify(articles, null, 2), 'utf-8');
-            console.log(`✅ News data saved to JSON file for ${config.name}:`, FILE_PATH);
-            console.log(`Total articles scraped: ${articles.length}`);
-        } else {
-            console.log(`No articles found to save for ${config.name}.`);
-        }
-
+        console.log(`Total articles scraped and saved to database: ${articles.length}`);
         return articles;
     } catch (error) {
         console.error(`❌ Error scraping news from ${config.name}:`, error);
@@ -390,20 +380,80 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
     }
 }
 
+// Function to save an article to Prisma DB
+async function saveArticleToDB(article: NewsArticle) {
+    try {
+        // Parse the date string to a Date object for Prisma
+        const articleDate = new Date(article.date);
+
+        // First check if an article with this URL already exists
+        const existingArticle = await prisma.news.findFirst({
+            where: {
+                url: article.url
+            }
+        });
+
+        if (existingArticle) {
+            // Update existing article
+            await prisma.news.update({
+                where: {
+                    id: existingArticle.id
+                },
+                data: {
+                    title: article.title,
+                    content: article.content,
+                    date: articleDate,
+                    url: article.url
+                }
+            });
+            console.log(`Updated existing article in database: ${article.title}`);
+        } else {
+            // Create new article
+            await prisma.news.create({
+                data: {
+                    title: article.title,
+                    content: article.content,
+                    date: articleDate,
+                    url: article.url
+                }
+            });
+            console.log(`Created new article in database: ${article.title}`);
+        }
+    } catch (error) {
+        console.error(`Error saving article to database: ${article.title}`, error);
+        throw error;
+    }
+}
+
 export async function scrapeAndStoreNews() {
-    const meepuraConfig: SiteConfig = {
-        name: "meepura",
-        baseUrl: "https://www.meepura.com/english/",
-        articleLinkPattern: /^https:\/\/www\.meepura\.com\/english\/\?p=\d+$/,
-        articleSelector: "article"
-    };
+    try {
+        const meepuraConfig: SiteConfig = {
+            name: "meepura",
+            baseUrl: "https://www.meepura.com/english/",
+            articleLinkPattern: /^https:\/\/www\.meepura\.com\/english\/\?p=\d+$/,
+            articleSelector: "article"
+        };
 
-    const deranaConfig: SiteConfig = {
-        name: "derana",
-        baseUrl: "https://www.adaderana.lk/hot-news/",
-        articleLinkPattern: /https:\/\/www\.adaderana\.lk\/news\/\d+\/[a-z0-9\-]+/,
-        articleSelector: "article"
-    };
+        const deranaConfig: SiteConfig = {
+            name: "derana",
+            baseUrl: "https://www.adaderana.lk/hot-news/",
+            articleLinkPattern: /https:\/\/www\.adaderana\.lk\/news\/\d+\/[a-z0-9\-]+/,
+            articleSelector: "article"
+        };
 
-    return await scrapeAndProcessNews(meepuraConfig, 100);
+        // Connect to the database before scraping
+        await prisma.$connect();
+
+        const result = await scrapeAndProcessNews(meepuraConfig, 5);
+
+        // Disconnect from the database when done
+        await prisma.$disconnect();
+
+        return result;
+    } catch (error) {
+        console.error("Error in scrapeAndStoreNews:", error);
+        // Ensure we disconnect even if there's an error
+        await prisma.$disconnect();
+        throw error;
+    }
 }
