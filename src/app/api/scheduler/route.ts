@@ -1,8 +1,6 @@
-// src/app/api/scheduler/route.ts
 import { NextResponse } from 'next/server';
 import { startScheduler } from '../../../../cron';
 
-// Store job reference to prevent garbage collection
 let schedulerJob: any = null;
 
 export async function GET() {
@@ -14,7 +12,6 @@ export async function GET() {
     }
 }
 
-// You could add other HTTP methods if needed
 export async function POST() {
     return NextResponse.json({ message: 'Method not supported' }, { status: 405 });
 }
