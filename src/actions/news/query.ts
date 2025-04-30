@@ -1,9 +1,9 @@
 'use server';
 
-import {processNews} from "../../../src/actions/news/operations.js";
-import {prisma} from "../../../src/prisma.js";
+import {processNews} from "@/actions/news/operations";
+import {prisma} from "@/prisma";
 
-import redis from "../../../src/lib/redis.js";
+import redis from "../../../src/lib/redis";
 
 const CACHE_KEY = "summarized_news";
 

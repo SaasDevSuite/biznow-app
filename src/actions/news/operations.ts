@@ -1,7 +1,7 @@
-import { analyzeSentiment } from '../../../src/service/sentiment-analysis.js';
-import { initializeCategorizer } from '../../../src/service/categorization.js';
-import { prisma } from '../../../src/prisma.js';
-import { callGroqAPI } from "../../../src/lib/groqClient.js";
+import { analyzeSentiment } from '@/service/sentiment-analysis';
+import { initializeCategorizer } from '@/service/categorization';
+import { prisma } from '@/prisma';
+import { callGroqAPI } from "@/lib/groqClient";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 5000;
