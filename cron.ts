@@ -1,4 +1,3 @@
-// scheduler.ts
 import schedule from 'node-schedule';
 import dotenv from 'dotenv';
 import {scrapeAndStoreNews} from "@/service/scraper";
@@ -6,12 +5,9 @@ import {processAllNews} from "@/actions/news/query";
 
 dotenv.config();
 
-// Function to start scheduling
 export function startScheduler(): void {
     console.log("Setting up scheduler...");
 
-    // Schedule job to run every 5 minutes
-    // The "*/5 * * * *" cron expression means "every 5 minutes"
     schedule.scheduleJob('*/5 * * * *', async function() {
         console.log("💻💻 Running the scraping job...💻💻");
 
