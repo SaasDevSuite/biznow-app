@@ -1,21 +1,28 @@
-import cron from 'node-cron';
-import { scrapeAndStoreNews } from './src/service/scraper.js';
+// scheduler.ts
+import schedule from 'node-schedule';
 import dotenv from 'dotenv';
-import { processAllNews } from "./src/actions/news/query.js";
+import {scrapeAndStoreNews} from "@/service/scraper";
+import {processAllNews} from "@/actions/news/query";
+
 dotenv.config();
 
-cron.schedule("*/5 * * * *", async () => {
-    console.log("💻💻 Running the scraping job...💻💻");
+// Function to start scheduling
+export function startScheduler(): void {
+    console.log("Setting up scheduler...");
 
-    try {
-        await scrapeAndStoreNews().then(async () => {
+    // Schedule job to run every 5 minutes
+    // The "*/5 * * * *" cron expression means "every 5 minutes"
+    schedule.scheduleJob('*/5 * * * *', async function() {
+        console.log("💻💻 Running the scraping job...💻💻");
+
+        try {
+            await scrapeAndStoreNews();
             console.log("🏁🏁 News scraped!!! now processing........! 🏁🏁");
             await processAllNews();
-        });
-        console.log("🎉🎉 News scraping job completed! 🎉🎉");
-    } catch (error) {
-        console.error("Cron job error:", error);
-    }
-});
-
-console.log("Running the scraping job... executed.");
+            console.log("🎉🎉 News scraping job completed! 🎉🎉");
+        } catch (error) {
+            console.error("Cron job error:", error);
+        }
+    });
+    console.log("News scraping job scheduled to run every 5 minutes!");
+}
