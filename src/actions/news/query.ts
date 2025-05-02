@@ -3,7 +3,7 @@
 import {processNews} from "@/actions/news/operations";
 import {prisma} from "@/prisma";
 
-import redis from "../../../src/lib/redis";
+import redis from "@/lib/redis";
 
 const CACHE_KEY = "summarized_news";
 
