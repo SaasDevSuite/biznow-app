@@ -133,7 +133,7 @@ export default function NewsDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-foreground">
-                            {dashboardData.regulatoryEaseScore}%
+                            {dashboardData.regulatoryEaseScore.toFixed(2)}%
                         </div>
                         <div
                             className={`flex items-center mt-1 ${dashboardData.regulatoryEaseScore > 50 ? "text-green-500" : "text-red-500"} text-sm`}>
