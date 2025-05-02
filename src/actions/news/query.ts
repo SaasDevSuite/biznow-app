@@ -4,6 +4,7 @@ import {processNews} from "@/actions/news/operations";
 import {prisma} from "@/prisma";
 
 import redis from "@/lib/redis";
+import {FrequencyData} from "@/components/custom/line-chart";
 
 const CACHE_KEY = "summarized_news";
 
@@ -116,3 +117,42 @@ export async function fetchNewsItems(
 }
 
 export {loadNewsData};
+
+export async function fetchNewsDistribution() {
+    try {
+        // Aggregate news items by day of the week
+        const newsItems = await prisma.summarizedNews.findMany({
+            select: {
+                date: true,
+            },
+        });
+
+        const dayMap: Record<string, number> = {
+            Sun: 0,
+            Mon: 0,
+            Tue: 0,
+            Wed: 0,
+            Thu: 0,
+            Fri: 0,
+            Sat: 0,
+        };
+
+        newsItems.forEach((item) => {
+            const date = new Date(item.date);
+            const day = date.toLocaleString("en-US", { weekday: "short" }); // e.g., "Mon"
+            if (dayMap[day] !== undefined) {
+                dayMap[day] += 1;
+            }
+        });
+
+        const frequencyData: FrequencyData[] = Object.entries(dayMap).map(([day, value]) => ({
+            day,
+            value,
+        }));
+
+        return frequencyData;
+    } catch (error) {
+        console.error("Error fetching news distribution:", error);
+        return [];
+    }
+}
