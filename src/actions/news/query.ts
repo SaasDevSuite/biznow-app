@@ -120,7 +120,6 @@ export {loadNewsData};
 
 export async function fetchNewsDistribution() {
     try {
-        // Aggregate news items by day of the week
         const newsItems = await prisma.summarizedNews.findMany({
             select: {
                 date: true,
@@ -139,7 +138,7 @@ export async function fetchNewsDistribution() {
 
         newsItems.forEach((item) => {
             const date = new Date(item.date);
-            const day = date.toLocaleString("en-US", { weekday: "short" }); // e.g., "Mon"
+            const day = date.toLocaleString("en-US", { weekday: "short" });
             if (dayMap[day] !== undefined) {
                 dayMap[day] += 1;
             }
