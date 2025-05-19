@@ -1,12 +1,14 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import {ArrowDown01, ArrowUp01, BarChart3, Scale, SmilePlus, TrendingUp} from "lucide-react";
+import {ArrowDown01, ArrowUp01, BarChart3, Scale, SmilePlus, TrendingUp, ArrowRight} from "lucide-react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import LineCharts from "@/components/custom/line-chart";
 import DonutChart from "@/components/custom/donut-chart";
 import {Skeleton} from "@/components/ui/skeleton";
 import {useNewsContext} from "@/contexts/news-context";
+import {Button} from "@/components/ui/button";
+import Link from "next/link";
 
 export default function NewsDashboard() {
     const [mounted, setMounted] = useState(false);
@@ -165,8 +167,16 @@ export default function NewsDashboard() {
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardContent className="p-3 flex justify-center">
+                    <CardContent className="p-3 flex flex-col justify-center">
                         <DonutChart title="Category Distribution" data={dashboardData.categoryData}/>
+                        <div className="mt-4 flex justify-center">
+                            <Button asChild size="sm">
+                                <Link href="/news/categories" className="flex items-center gap-2">
+                                    View Categories
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
