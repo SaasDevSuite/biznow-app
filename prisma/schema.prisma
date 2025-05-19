@@ -182,6 +182,7 @@ model News {
   title   String
   content String
   date    DateTime
+  matchedCategories String
   url     String
 
   @@map("news")
