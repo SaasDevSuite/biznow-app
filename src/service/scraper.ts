@@ -417,6 +417,7 @@ async function saveArticleToDB(article: NewsArticle) {
                     title: article.title,
                     content: article.content,
                     date: articleDate,
+                    matchedCategories:"",
                     url: article.url
                 }
             });
@@ -448,7 +449,7 @@ export async function scrapeAndStoreNews() {
         // Connect to the database before scraping
         await prisma.$connect();
 
-        const result = await scrapeAndProcessNews(meepuraConfig, 5);
+        const result = await scrapeAndProcessNews(meepuraConfig, 20);
 
         // Disconnect from the database when done
         await prisma.$disconnect();
