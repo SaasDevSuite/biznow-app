@@ -35,6 +35,7 @@ const loadNewsData = async (): Promise<any[]> => {
             content: newsItem.content,
             date: newsItem.date,  // Already a Date object from Prisma
             url: newsItem.url,
+            matchedCategories: newsItem.matchedCategories,
             id: newsItem.id
         }));
 
