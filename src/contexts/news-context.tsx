@@ -56,21 +56,39 @@ export function NewsProvider({children}: { children: ReactNode }) {
     const getColorForCategory = (category: string): string => {
         const mapping: Record<string, string> = {
             Technology: "#4a69dd",
-            Economy: "#90c469",
-            Environment: "#f6c652",
+            Business: "#34495e",
             Politics: "#f05a5a",
+            Sports: "#00b894",
+            Entertainment: "#e84393",
+            Health: "#e17055",
+            Science: "#00cec9",
+            Finance: "#0984e3",
+            Travel: "#fab1a0",
+            Weather: "#74b9ff",
+            Education: "#f39c12",
+            Crime: "#c0392b",
+            "Human Rights": "#e67e22",
+            Environment: "#27ae60",
+            Startups: "#55efc4",
+            Agriculture: "#27ae60",
+            "Culture & Heritage": "#a29bfe",
+            Tourism: "#16a085",
+            Economy: "#90c469",
+            "Social Issues": "#8e44ad",
             Other: "#5ec8eb",
+            Obituaries: "#636e72"
         };
         return mapping[category] || "#8884d8";
     };
 
     const getColorForSentiment = (sentiment: string): string => {
+        const normalizedSentiment = sentiment.toLowerCase();
         const mapping: Record<string, string> = {
-            Positive: "#4a69dd",
-            Neutral: "#90c469",
-            Negative: "#f6c652",
+            positive: "#4a69dd",
+            neutral: "#90c469",
+            negative: "#f6c652",
         };
-        return mapping[sentiment] || "#8884d8";
+        return mapping[normalizedSentiment] || "#8884d8";
     };
 
     useEffect(() => {
