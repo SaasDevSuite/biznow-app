@@ -72,7 +72,7 @@ const Page = () => {
                     </CardHeader>
                     <CardContent>
                         <p className="mb-4">
-                            Check out our subscription plans to get the most out of Biznow's features.
+                            Check out our subscription plans to get the most out of Biznow&apos;s features.
                         </p>
                         <Button asChild>
                             <Link href="/pricing" className="flex items-center gap-2">

@@ -2,7 +2,7 @@
 import {ThemeToggle} from "@/components/theme-toggle"
 import {Notifications} from "@/components/notifications"
 import Link from "next/link"
-import {usePathname, useRouter} from "next/navigation"
+import {usePathname} from "next/navigation"
 import {useSettings} from "@/contexts/settings-context"
 import {
     DropdownMenu,
@@ -14,32 +14,48 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {Button} from "@/components/ui/button"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import {signOut, useSession} from "next-auth/react"
 import Image from "next/image"
-import {BarChart2, Download, FileText, Settings} from "lucide-react"
+import { Download} from "lucide-react"
 
-// Handle news context import safely
-let NewsContext: any;
-try {
-  NewsContext = require("@/contexts/news-context").useNewsContext;
-} catch (e) {
-  NewsContext = null;
-}
+// // Handle news context import safely
+// let NewsContext: any;
+// try {
+//   NewsContext = require("@/contexts/news-context").useNewsContext;
+// } catch (e) {
+//   NewsContext = null;
+// }
 
 export function TopNav() {
     const pathname = usePathname()
-    const pathSegments = pathname.split("/").filter(Boolean)
+    //const pathSegments = pathname.split("/").filter(Boolean)
     const {settings} = useSettings()
     const session = useSession()
-    const router = useRouter()
+    //const router = useRouter()
+
+    const [newsContext, setNewsContext] = useState<any>(null)
     
     // Check if current path is in news section
     const isNewsSection = pathname.startsWith('/news')
-    const isOnSummaryPage = pathname === '/news/summary'
+    //const isOnSummaryPage = pathname === '/news/summary'
+
+    useEffect(() => {
+        const loadNewsContext = async () => {
+            if (isNewsSection) {
+                try {
+                    const mod = await import("@/contexts/news-context")
+                    setNewsContext(mod.useNewsContext())
+                } catch {
+                    setNewsContext(null)
+                }
+            }
+        }
+        loadNewsContext()
+    }, [isNewsSection])
     
     // Access news context for export functionality (only when in news section)
-    const newsContext = isNewsSection && NewsContext ? NewsContext() : null
+    //const newsContext = isNewsSection && NewsContext ? NewsContext() : null
 
     return (
         <header className="sticky top-0 z-40 border-b bg-background">
