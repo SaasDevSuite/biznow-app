@@ -74,6 +74,7 @@ function formatDateString(dateStr: string): { formatted: string, raw: string } {
         const mdyMatch = raw.match(monthDayYearRegex);
 
         if (mdyMatch) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [_, month, day, year] = mdyMatch;
             const monthIndex = new Date(`${month} 1, 2000`).getMonth();
             if (!isNaN(monthIndex)) {
@@ -89,6 +90,7 @@ function formatDateString(dateStr: string): { formatted: string, raw: string } {
         const dmyMatch = raw.match(dayMonthYearRegex);
 
         if (dmyMatch) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [_, day, month, year] = dmyMatch;
             const monthIndex = new Date(`${month} 1, 2000`).getMonth();
             if (!isNaN(monthIndex)) {
@@ -104,6 +106,7 @@ function formatDateString(dateStr: string): { formatted: string, raw: string } {
         const numericMatch = raw.match(numericDateRegex);
 
         if (numericMatch) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const [_, first, second, year] = numericMatch;
             const formattedYear = year.length === 2 ? `20${year}` : year;
             const formattedDate = new Date(`${first}/${second}/${formattedYear}`);
@@ -434,6 +437,7 @@ export async function scrapeAndStoreNews() {
             articleSelector: "article"
         };
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const deranaConfig: SiteConfig = {
             name: "derana",
             baseUrl: "https://www.adaderana.lk/hot-news/",
