@@ -19,26 +19,15 @@ import {signOut, useSession} from "next-auth/react"
 import Image from "next/image"
 import { Download} from "lucide-react"
 
-// // Handle news context import safely
-// let NewsContext: any;
-// try {
-//   NewsContext = require("@/contexts/news-context").useNewsContext;
-// } catch (e) {
-//   NewsContext = null;
-// }
 
 export function TopNav() {
     const pathname = usePathname()
-    //const pathSegments = pathname.split("/").filter(Boolean)
     const {settings} = useSettings()
     const session = useSession()
-    //const router = useRouter()
 
     const [newsContext, setNewsContext] = useState<any>(null)
 
-    // Check if current path is in news section
     const isNewsSection = pathname.startsWith('/news')
-    //const isOnSummaryPage = pathname === '/news/summary'
 
     useEffect(() => {
         const loadNewsContext = async () => {
@@ -53,9 +42,6 @@ export function TopNav() {
         }
         loadNewsContext()
     }, [isNewsSection])
-
-    // Access news context for export functionality (only when in news section)
-    //const newsContext = isNewsSection && NewsContext ? NewsContext() : null
 
     return (
         <header className="sticky top-0 z-40 border-b bg-background">
