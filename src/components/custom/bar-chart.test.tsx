@@ -32,11 +32,6 @@ describe("CustomBarChart", () => {
     { name: "Category C", value: 15, color: "#00ff00" },
   ];
 
-  const fallbackColors = [
-    "#3366CC", "#DC3912", "#FF9900", "#109618", "#990099",
-    "#0099C6", "#DD4477", "#66AA00", "#B82E2E", "#316395",
-  ];
-
   it("renders title when provided", () => {
     render(<CustomBarChart data={sampleData} title="Test Chart Title" />);
     expect(screen.getByText("Test Chart Title")).toBeInTheDocument();
@@ -62,12 +57,10 @@ describe("CustomBarChart", () => {
   it("uses custom dataKey when provided", () => {
     render(<CustomBarChart data={sampleData} dataKey="customKey" />);
 
-    // We need to check if Bar was called with the correct props
-    // Since we're mocking the component, we need to verify the props were passed correctly
+    // Check if Bar was called with the correct props
     expect(Bar).toHaveBeenCalled();
 
-    // In our mock implementation, we're not actually passing the props to the Bar component
-    // So we need to modify our test to check if the component was rendered with the right props
+    // Check if the component was rendered with the right props
     const calls = (Bar as unknown as jest.Mock).mock.calls;
     let foundCustomKey = false;
 
@@ -95,7 +88,6 @@ describe("CustomBarChart", () => {
 
     expect(XAxis).toHaveBeenCalled();
 
-    // Similar to the dataKey test, we need to check all calls to XAxis
     const calls = (XAxis as unknown as jest.Mock).mock.calls;
     let foundCustomXKey = false;
 
