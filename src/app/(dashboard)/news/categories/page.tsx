@@ -16,6 +16,17 @@ export default function CategoriesPage() {
   const { dashboardData, isLoading } = useNewsContext();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  const getRandomColor = (seed: string) => {
+    // Simple hash function to generate consistent colors
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+    return `#${'00000'.substring(0, 6 - c.length)}${c}`;
+  };
+
   // Sort categories by value
   const sortedCategories = [...dashboardData.categoryData].sort(
       (a, b) => b.value - a.value
@@ -115,18 +126,6 @@ export default function CategoriesPage() {
       { name: "Supply Chain", value: 24, color: "#4a69dd" },
       { name: "Workforce Issues", value: 16, color: "#5ec8eb" }
     ];
-  };
-
-  // Fallback function for sentiment colors
-  const getRandomColor = (seed: string) => {
-    // Simple hash function to generate consistent colors
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-    return `#${'00000'.substring(0, 6 - c.length)}${c}`;
   };
 
   return (
