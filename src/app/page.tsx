@@ -1,27 +1,27 @@
 "use client"
-
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Button } from "@/components/ui/button"
-import { auth } from "@/auth"
 import Link from "next/link"
+import {Button} from "@/components/ui/button"
+import {ThemeToggle} from "@/components/theme-toggle"
+import {useSession} from "next-auth/react";
 import Image from "next/image"
 
-export default async function Home() {
-    const session = await auth()
+export default function Home() {
+    const {data: session} = useSession()
 
-    if (session) {
+
+    if (session && session.user) {
         return (
             <div className="flex min-h-screen flex-col items-center justify-center space-y-8 p-4 text-center">
                 <div className="absolute right-4 top-4">
                     <ThemeToggle />
                 </div>
                 <div className="space-y-2">
-                    <Image 
-                        src="/biznow-logo.webp" 
-                        alt="Biznow Logo" 
-                        width={200} 
-                        height={80} 
-                        className="mx-auto mb-6" 
+                    <Image
+                        src="/biznow-logo.webp"
+                        alt="Biznow Logo"
+                        width={200}
+                        height={80}
+                        className="mx-auto mb-6"
                     />
                     <h1 className="text-4xl font-bold">Welcome to Biznow</h1>
                     <p className="text-muted-foreground">Your business news analytics platform</p>
@@ -41,12 +41,12 @@ export default async function Home() {
                 <ThemeToggle />
             </div>
             <div className="space-y-2">
-                <Image 
-                    src="/biznow-logo.webp" 
-                    alt="Biznow Logo" 
-                    width={200} 
-                    height={80} 
-                    className="mx-auto mb-6" 
+                <Image
+                    src="/biznow-logo.webp"
+                    alt="Biznow Logo"
+                    width={200}
+                    height={80}
+                    className="mx-auto mb-6"
                 />
                 <h1 className="text-4xl font-bold">Biznow</h1>
                 <p className="text-muted-foreground">Business news analytics that keeps you ahead of the market</p>
@@ -62,4 +62,3 @@ export default async function Home() {
         </div>
     )
 }
-
