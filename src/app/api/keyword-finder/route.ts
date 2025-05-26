@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { storeCategoriesInDb} from "@/service/keyword-finder";
+import { storeLLMCategoriesInDb} from "@/service/keyword-finder";
 
 export async function GET() {
-    await storeCategoriesInDb();
+    await storeLLMCategoriesInDb();
     return NextResponse.json({ message: 'Scraping completed and saved to JSON file' });
 }
