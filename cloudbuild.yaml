@@ -1,0 +1,94 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '--no-cache'
+      - '-t'
+      - >
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - .
+      - '-f'
+      - Dockerfile
+      - '--build-arg'
+      - 'NEXT_PUBLIC_URL=${_NEXT_PUBLIC_URL}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}'
+      - '--build-arg'
+      - 'DATABASE_URL=${_DATABASE_URL}'
+      - '--build-arg'
+      - 'API_SECRET_KEY=${_API_SECRET_KEY}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_KEY=${_NEXT_PUBLIC_API_KEY}'
+      - '--build-arg'
+      - 'GROQ_API_KEY=${_GROQ_API_KEY}'
+      - '--build-arg'
+      - 'AUTH_SECRET=${_AUTH_SECRET}'
+      - '--build-arg'
+      - 'REDIS_URL=${_REDIS_URL}'
+      - '--build-arg'
+      - 'RESEND_API_KEY=${_RESEND_API_KEY}'
+      - '--build-arg'
+      - 'NO_REPLY_EMAIL=${_NO_REPLY_EMAIL}'
+    id: Build
+    env:
+      - 'NEXT_PUBLIC_URL=${_NEXT_PUBLIC_URL}'
+      - 'NEXT_PUBLIC_SUPABASE_URL=${_NEXT_PUBLIC_SUPABASE_URL}'
+      - 'NEXT_PUBLIC_SUPABASE_ANON_KEY=${_NEXT_PUBLIC_SUPABASE_ANON_KEY}'
+      - 'DATABASE_URL=${_DATABASE_URL}'
+      - 'API_SECRET_KEY=${_API_SECRET_KEY}'
+      - 'NEXT_PUBLIC_API_KEY=${_NEXT_PUBLIC_API_KEY}'
+      - 'GROQ_API_KEY=${_GROQ_API_KEY}'
+      - 'AUTH_SECRET=${_AUTH_SECRET}'
+      - 'REDIS_URL=${_REDIS_URL}'
+      - 'RESEND_API_KEY=${_RESEND_API_KEY}'
+      - 'NO_REPLY_EMAIL=${_NO_REPLY_EMAIL}'
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - >
+        $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - '--platform=managed'
+      - >
+        --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - >
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - '--region=$_DEPLOY_REGION'
+      - '--quiet'
+    id: Deploy
+    entrypoint: gcloud
+images:
+  - >
+    $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _TRIGGER_ID: 275b6d99-0239-4060-9e5b-a2587ccc1c16
+  _AR_HOSTNAME: us-central1-docker.pkg.dev
+  _PLATFORM: managed
+  _SERVICE_NAME: biznow-app
+  _DEPLOY_REGION: us-central1
+  _NEXT_PUBLIC_URL:
+  _NEXT_PUBLIC_SUPABASE_URL:
+  _NEXT_PUBLIC_SUPABASE_ANON_KEY:
+  _DATABASE_URL:
+  _API_SECRET_KEY:
+  _NEXT_PUBLIC_API_KEY:
+  _GROQ_API_KEY:
+  _AUTH_SECRET:
+  _REDIS_URL:
+  _RESEND_API_KEY:
+  _NO_REPLY_EMAIL:
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - biznow-app
