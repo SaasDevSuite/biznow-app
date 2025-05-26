@@ -1,76 +1,85 @@
 import { loadNewsData } from "@/actions/news/query";
-import businessKeywords from "@/../public/data/business-keywords.json";
-import { PorterStemmer } from "natural";
 import { prisma } from "@/prisma";
 
-type TaggedNews = {
+type LLMTaggedNews = {
     id: string;
-    matched_categories: string[];
+    category: string;
 };
 
-function getCategoryStemMap(): Map<string, Set<string>> {
-    const categoryMap = new Map<string, Set<string>>();
+const model = "llama3-8b-8192"; //or "mixtral-8x7b-32768"
 
-    for (const [category, keywords] of Object.entries(businessKeywords)) {
-        const stemmedSet = new Set<string>();
-        for (const keyword of keywords) {
-            const stemmed = PorterStemmer.stem(keyword.toLowerCase());
-            stemmedSet.add(stemmed);
-        }
-        categoryMap.set(category, stemmedSet);
-    }
+function buildPrompt(title: string, content: string): string {
+    return `
+You are a business news classifier.
 
-    return categoryMap;
+Read the article and classify it into exactly ONE of the following categories:
+- business_growth → company expansion, investment, new branches, partnerships
+- regulatory_change → laws, taxes, government policies affecting business
+- economic_risk → economic crisis, layoffs, inflation, shortages
+- market_trend → consumer demand, pricing, sales, seasonal business
+- technology_innovation → AI, new tech, apps, digital transformation
+- infrastructure → construction, logistics, roads, power, transport
+- general_business → anything else not fitting above
+
+Respond ONLY in this JSON format:
+{ "category": "..." }
+
+Article:
+Title: ${title}
+Content: ${content}
+`;
 }
 
-export async function findKeywords(): Promise<TaggedNews[]> {
-    const newsData = await loadNewsData();
-    const categoryMap = getCategoryStemMap();
+async function classifyWithGroq(title: string, content: string): Promise<string> {
+    const prompt = buildPrompt(title, content);
 
-    const taggedArticles: TaggedNews[] = [];
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+            model,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0,
+        }),
+    });
+
+    const data = await res.json();
+
+    try {
+        const parsed = JSON.parse(data.choices[0].message.content);
+        return parsed.category || "general_business";
+    } catch (err) {
+        console.error("❌ Failed to parse Groq response:", err);
+        return "general_business";
+    }
+}
+
+export async function llmFindNewsCategories(): Promise<LLMTaggedNews[]> {
+    const newsData = await loadNewsData();
+    const results: LLMTaggedNews[] = [];
 
     for (const news of newsData) {
-        const combinedText = `${news.title}. ${news.content}`.toLowerCase();
-        const words = combinedText.split(/\W+/);
+        const category = await classifyWithGroq(news.title, news.content);
+        results.push({ id: news.id, category });
 
-        const articleStems = new Set<string>();
-        for (const word of words) {
-            const stemmed = PorterStemmer.stem(word);
-            articleStems.add(stemmed);
-        }
-
-        const matchedCategories: string[] = [];
-
-        for (const [category, stemmedKeywords] of categoryMap.entries()) {
-            const intersects = [...stemmedKeywords].some(stem => articleStems.has(stem));
-            if (intersects) {
-                matchedCategories.push(category);
-            }
-        }
-
-        if (matchedCategories.length > 0) {
-            taggedArticles.push({
-                id: news.id,
-                matched_categories: matchedCategories
-            });
-        }
+        console.log(`✅ [${news.title}] → ${category}`);
     }
 
-    for (const taggedArticle of taggedArticles) {
-        console.log(taggedArticle);
-    }
-    return taggedArticles;
+    return results;
 }
 
-export async function storeCategoriesInDb() {
-    const taggedArticles = await findKeywords();
+export async function storeLLMCategoriesInDb() {
+    const taggedArticles = await llmFindNewsCategories();
 
     for (const article of taggedArticles) {
         await prisma.news.update({
             where: { id: article.id },
             data: {
-                matchedCategories: JSON.stringify(article.matched_categories)
-            }
+                matchedCategories: article.category,
+            },
         });
     }
 }
