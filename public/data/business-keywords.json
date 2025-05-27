@@ -1,6 +1,0 @@
-{
-  "regulatory": ["tax", "policy", "regulation"],
-  "growth": ["expand", "launch", "funding"],
-  "risk": ["crisis", "layoff", "decline", "strike"],
-  "general": ["investment", "budget", "subsidy", "illegal", "construct", "inspector"]
-}
