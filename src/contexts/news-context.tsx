@@ -101,6 +101,7 @@ export function NewsProvider({children}: { children: ReactNode }) {
                     title: item.title,
                     content: item.content,
                     category: item.category,
+                    mainCategory: item.mainCategory,
                     sentiment: item.sentiment,
                     date: item.date,
                     url: item.url,
