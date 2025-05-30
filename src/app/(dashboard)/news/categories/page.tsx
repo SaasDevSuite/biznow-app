@@ -16,12 +16,12 @@ export default function CategoriesPage() {
   const { dashboardData, isLoading } = useNewsContext();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [mainCategoryStats, setMainCategoryStats] = useState<any>(null);
-  const [isLoadingMainCategories, setIsLoadingMainCategories] = useState(false);
+  //const [isLoadingMainCategories, setIsLoadingMainCategories] = useState(false);
 
   // Fetch main category statistics
   useEffect(() => {
     const fetchMainCategoryStats = async () => {
-      setIsLoadingMainCategories(true);
+      //setIsLoadingMainCategories(true);
       try {
         const params = new URLSearchParams();
         if (selectedCategory) {
@@ -38,7 +38,7 @@ export default function CategoriesPage() {
       } catch (error) {
         console.error('Error fetching main category stats:', error);
       } finally {
-        setIsLoadingMainCategories(false);
+        //setIsLoadingMainCategories(false);
       }
     };
 
@@ -311,11 +311,6 @@ export default function CategoriesPage() {
                                   title={selectedCategory ? `${selectedCategory} Regulatory Impact` : "Overall Regulatory Impact"}
                                   data={getRegulationData()}
                               />
-                              {isLoadingMainCategories && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                                  <div className="text-sm text-gray-500">Loading real data...</div>
-                                </div>
-                              )}
                             </TabsContent>
 
                             <TabsContent value="growth" className="mt-0">
@@ -323,11 +318,6 @@ export default function CategoriesPage() {
                                   title={selectedCategory ? `${selectedCategory} Growth Indicators` : "Overall Growth Indicators"}
                                   data={getGrowthData()}
                               />
-                              {isLoadingMainCategories && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                                  <div className="text-sm text-gray-500">Loading real data...</div>
-                                </div>
-                              )}
                             </TabsContent>
 
                             <TabsContent value="risk" className="mt-0">
@@ -335,11 +325,6 @@ export default function CategoriesPage() {
                                   title={selectedCategory ? `${selectedCategory} Risk Analysis` : "Overall Risk Analysis"}
                                   data={getRiskData()}
                               />
-                              {isLoadingMainCategories && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                                  <div className="text-sm text-gray-500">Loading real data...</div>
-                                </div>
-                              )}
                             </TabsContent>
                           </Tabs>
                         </CardContent>
@@ -403,11 +388,6 @@ export default function CategoriesPage() {
                                   title={selectedCategory ? `${selectedCategory} Regulatory Impact` : "Overall Regulatory Impact"}
                                   data={getRegulationData()}
                               />
-                              {isLoadingMainCategories && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                                  <div className="text-sm text-gray-500">Loading real data...</div>
-                                </div>
-                              )}
                             </TabsContent>
 
                             <TabsContent value="growth" className="mt-0">
@@ -415,11 +395,6 @@ export default function CategoriesPage() {
                                   title={selectedCategory ? `${selectedCategory} Growth Indicators` : "Overall Growth Indicators"}
                                   data={getGrowthData()}
                               />
-                              {isLoadingMainCategories && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                                  <div className="text-sm text-gray-500">Loading real data...</div>
-                                </div>
-                              )}
                             </TabsContent>
 
                             <TabsContent value="risk" className="mt-0">
@@ -427,11 +402,6 @@ export default function CategoriesPage() {
                                   title={selectedCategory ? `${selectedCategory} Risk Analysis` : "Overall Risk Analysis"}
                                   data={getRiskData()}
                               />
-                              {isLoadingMainCategories && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                                  <div className="text-sm text-gray-500">Loading real data...</div>
-                                </div>
-                              )}
                             </TabsContent>
                           </Tabs>
                         </CardContent>
