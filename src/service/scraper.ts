@@ -319,6 +319,31 @@ async function callGroqLLMService(text: string, url: string, source: string, api
     };
 }
 
+async function makeRequestWithRetry(url: string, maxRetries: number = 3): Promise<string> {
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            const { data } = await axios.get(url, {
+                timeout: 10000, // 10 second timeout
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+            });
+            return data;
+        } catch (error: any) {
+            lastError = error;
+            if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+                const delay = Math.min(1000 * Math.pow(2, attempt), 10000); // Exponential backoff, max 10 seconds
+                console.log(`Request failed, retrying in ${delay}ms... (Attempt ${attempt + 1}/${maxRetries})`);
+                await sleep(delay);
+                continue;
+            }
+            throw error;
+        }
+    }
+    throw lastError;
+}
+
 // Modified function to save to Prisma instead of JSON
 export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: number = 10) {
     const articles: NewsArticle[] = [];
@@ -326,7 +351,7 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
 
     try {
         console.log(`Starting to scrape ${config.name} at ${config.baseUrl}`);
-        const { data } = await axios.get(config.baseUrl);
+        const data = await makeRequestWithRetry(config.baseUrl);
         const $ = cheerio.load(data);
 
         const links = $('a');
@@ -335,7 +360,6 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
         let articlesProcessed = 0;
 
         for (const link of links) {
-            // Check whether the limit reached
             if (articlesProcessed >= maxArticles) {
                 console.log(`Reached maximum of ${maxArticles} articles for ${config.name}`);
                 break;
@@ -349,7 +373,7 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
                 console.log(`Processing article from ${config.name}: ${absoluteUrl}`);
 
                 try {
-                    const { data: articleData } = await axios.get(absoluteUrl);
+                    const articleData = await makeRequestWithRetry(absoluteUrl);
 
                     let articleHtml = articleData;
                     if (config.articleSelector) {
@@ -360,13 +384,11 @@ export async function scrapeAndProcessNews(config: SiteConfig, maxArticles: numb
                     const processedArticle = await extractWithLLM(articleHtml, absoluteUrl, config.name);
                     articles.push(processedArticle);
 
-                    // Save each article to the database as it's processed
                     await saveArticleToDB(processedArticle);
 
                     articlesProcessed++;
                     console.log(`Successfully processed and saved article ${articlesProcessed} from ${config.name}`);
 
-                    // Add a larger delay between articles to help with rate limiting
                     await sleep(2500);
                 } catch (error) {
                     console.error(`Error processing article ${absoluteUrl}:`, error);
@@ -449,7 +471,7 @@ export async function scrapeAndStoreNews() {
         // Connect to the database before scraping
         await prisma.$connect();
 
-        const result = await scrapeAndProcessNews(meepuraConfig, 20);
+        const result = await scrapeAndProcessNews(meepuraConfig, 5);
 
         // Disconnect from the database when done
         await prisma.$disconnect();
@@ -462,3 +484,4 @@ export async function scrapeAndStoreNews() {
         throw error;
     }
 }
+
