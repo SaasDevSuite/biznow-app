@@ -26,8 +26,15 @@ export const callGroqAPI = async (systemPrompt: string, userInput: string): Prom
         );
 
         return response.data.choices[0].message.content;
-    } catch (error) {
+    } catch (error:any) {
         console.error("Error calling Groq API:", error);
+
+        // Check if it's a rate limiting error
+        if (error.response?.status === 429) {
+            console.error("❌ Rate limit exceeded (429)");
+            throw new Error("429 Rate limit exceeded");
+        }
+
         return "Error processing request";
     }
 };

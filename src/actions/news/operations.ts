@@ -2,6 +2,10 @@ import { analyzeSentiment } from '@/service/sentiment-analysis';
 import { initializeCategorizer } from '@/service/categorization';
 import { prisma } from '@/prisma';
 import { callGroqAPI } from "@/lib/groqClient";
+import { MainCategory } from "@prisma/client";
+
+// Import the main categorization function from keyword-finder
+import { classifyMainCategory } from '@/service/keyword-finder';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 5000;
@@ -88,6 +92,17 @@ export const processNews = async (newsItem: { title: string; content: string; da
             console.warn("⚠️ Categorization failed", error);
         }
 
+        // Main category classification using keyword-finder
+        let mainCategory: string = "GENERAL";
+        try {
+            const fullText = `${newsItem.title} ${summarizedContent}`;
+            const mainCategoryResult = await classifyMainCategory(fullText, summarizedContent);
+            mainCategory = mainCategoryResult.mainCategory;
+        } catch (error) {
+            console.warn("⚠️ Main categorization failed:", error);
+            mainCategory = "GENERAL";
+        }
+
         let sentiment: string | null = null;
         try {
             const sentimentResult = await analyzeSentiment(summarizedContent);
@@ -105,12 +120,13 @@ export const processNews = async (newsItem: { title: string; content: string; da
                     title: newsItem.title,
                     content: summarizedContent,
                     category,
+                    mainCategory: mainCategory as MainCategory,
                     sentiment,
                     date: newsItem.date,
                     url: newsItem.url,
                 },
             });
-            console.log("✅ Processed:", newsItem.title);
+            console.log(`✅ Processed: ${newsItem.title} | Category: ${category} | Main: ${mainCategory}`);
         } else {
             console.warn(`⚠️ Skipped storing news due to missing category (${category}) or sentiment (${sentiment})`);
         }
