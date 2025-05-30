@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle, TrendingUp, Scale } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,35 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 export default function CategoriesPage() {
   const { dashboardData, isLoading } = useNewsContext();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [mainCategoryStats, setMainCategoryStats] = useState<any>(null);
+  const [isLoadingMainCategories, setIsLoadingMainCategories] = useState(false);
+
+  // Fetch main category statistics
+  useEffect(() => {
+    const fetchMainCategoryStats = async () => {
+      setIsLoadingMainCategories(true);
+      try {
+        const params = new URLSearchParams();
+        if (selectedCategory) {
+          params.append('category', selectedCategory);
+        }
+
+        const response = await fetch(`/api/news/main-categories?${params}`);
+        if (response.ok) {
+          const data = await response.json();
+          setMainCategoryStats(data);
+        } else {
+          console.error('Failed to fetch main category stats');
+        }
+      } catch (error) {
+        console.error('Error fetching main category stats:', error);
+      } finally {
+        setIsLoadingMainCategories(false);
+      }
+    };
+
+    fetchMainCategoryStats();
+  }, [selectedCategory]);
 
   const getRandomColor = (seed: string) => {
     // Simple hash function to generate consistent colors
@@ -66,65 +95,116 @@ export default function CategoriesPage() {
     }));
   }, [selectedCategory, categoryNews, dashboardData.sentimentData]);
 
-  // Sample data for Regulatory Mentions
-  const getRegulationData = (category: string | null): ChartData[] => {
-    if (category) {
-      return [
-        { name: "Policy Changes", value: Math.floor(Math.random() * 30) + 10, color: "#4a69dd" },
-        { name: "Compliance", value: Math.floor(Math.random() * 25) + 15, color: "#f05a5a" },
-        { name: "Legal Updates", value: Math.floor(Math.random() * 20) + 5, color: "#f6c652" },
-        { name: "Tax Regulations", value: Math.floor(Math.random() * 15) + 10, color: "#5ec8eb" }
-      ];
+  // Helper function to format main category names for display
+  const formatMainCategoryName = (category: string): string => {
+    return category
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  // Real data for Regulatory Mentions from database
+  const getRegulationData = (): ChartData[] => {
+    const regulatoryCategories = ['POLICY_CHANGES', 'COMPLIANCE', 'LEGAL_UPDATES', 'TAX_REGULATIONS'];
+    const colorMap: Record<string, string> = {
+      'POLICY_CHANGES': '#4a69dd',
+      'COMPLIANCE': '#f05a5a',
+      'LEGAL_UPDATES': '#f6c652',
+      'TAX_REGULATIONS': '#5ec8eb'
+    };
+
+    // If we have real data, use it
+    if (mainCategoryStats?.mainCategoryData) {
+      const realData = mainCategoryStats.mainCategoryData
+        .filter((item: any) => regulatoryCategories.includes(item.name))
+        .map((item: any) => ({
+          name: formatMainCategoryName(item.name),
+          value: item.value,
+          color: colorMap[item.name] || '#9ca3af'
+        }));
+
+      // If we have real data, return it
+      if (realData.length > 0) {
+        return realData;
+      }
     }
 
-    // Default data for all categories
+    // Fallback data when no real data is available
     return [
-      { name: "Policy Changes", value: 28, color: "#4a69dd" },
-      { name: "Compliance", value: 35, color: "#f05a5a" },
-      { name: "Legal Updates", value: 22, color: "#f6c652" },
-      { name: "Tax Regulations", value: 15, color: "#5ec8eb" }
+      { name: "Policy Changes", value: 0, color: "#4a69dd" },
+      { name: "Compliance", value: 0, color: "#f05a5a" },
+      { name: "Legal Updates", value: 0, color: "#f6c652" },
+      { name: "Tax Regulations", value: 0, color: "#5ec8eb" }
     ];
   };
 
-  // Sample data for Growth Mentions
-  const getGrowthData = (category: string | null): ChartData[] => {
-    // If we have a selected category, filter or adjust the data accordingly
-    if (category) {
-      return [
-        { name: "Market Expansion", value: Math.floor(Math.random() * 40) + 20, color: "#90c469" },
-        { name: "New Investments", value: Math.floor(Math.random() * 30) + 15, color: "#4a69dd" },
-        { name: "Innovation", value: Math.floor(Math.random() * 25) + 10, color: "#f6c652" },
-        { name: "Partnerships", value: Math.floor(Math.random() * 20) + 5, color: "#5ec8eb" }
-      ];
+  // Real data for Growth Mentions from database
+  const getGrowthData = (): ChartData[] => {
+    const growthCategories = ['MARKET_EXPANSION', 'NEW_INVESTMENTS', 'INNOVATION', 'PARTNERSHIPS'];
+    const colorMap: Record<string, string> = {
+      'MARKET_EXPANSION': '#90c469',
+      'NEW_INVESTMENTS': '#4a69dd',
+      'INNOVATION': '#f6c652',
+      'PARTNERSHIPS': '#5ec8eb'
+    };
+
+    // If we have real data, use it
+    if (mainCategoryStats?.mainCategoryData) {
+      const realData = mainCategoryStats.mainCategoryData
+        .filter((item: any) => growthCategories.includes(item.name))
+        .map((item: any) => ({
+          name: formatMainCategoryName(item.name),
+          value: item.value,
+          color: colorMap[item.name] || '#9ca3af'
+        }));
+
+      // If we have real data, return it
+      if (realData.length > 0) {
+        return realData;
+      }
     }
 
-    // Default data for all categories
+    // Fallback data when no real data is available
     return [
-      { name: "Market Expansion", value: 42, color: "#90c469" },
-      { name: "New Investments", value: 38, color: "#4a69dd" },
-      { name: "Innovation", value: 27, color: "#f6c652" },
-      { name: "Partnerships", value: 18, color: "#5ec8eb" }
+      { name: "Market Expansion", value: 0, color: "#90c469" },
+      { name: "New Investments", value: 0, color: "#4a69dd" },
+      { name: "Innovation", value: 0, color: "#f6c652" },
+      { name: "Partnerships", value: 0, color: "#5ec8eb" }
     ];
   };
 
-  // Sample data for Risk Signals
-  const getRiskData = (category: string | null): ChartData[] => {
-    // If we have a selected category, filter or adjust the data accordingly
-    if (category) {
-      return [
-        { name: "Market Volatility", value: Math.floor(Math.random() * 35) + 10, color: "#f05a5a" },
-        { name: "Competition", value: Math.floor(Math.random() * 30) + 15, color: "#f6c652" },
-        { name: "Supply Chain", value: Math.floor(Math.random() * 25) + 5, color: "#4a69dd" },
-        { name: "Workforce Issues", value: Math.floor(Math.random() * 20) + 10, color: "#5ec8eb" }
-      ];
+  // Real data for Risk Signals from database
+  const getRiskData = (): ChartData[] => {
+    const riskCategories = ['MARKET_VOLATILITY', 'COMPETITION', 'SUPPLY_CHAIN', 'WORKFORCE_ISSUES'];
+    const colorMap: Record<string, string> = {
+      'MARKET_VOLATILITY': '#f05a5a',
+      'COMPETITION': '#f6c652',
+      'SUPPLY_CHAIN': '#4a69dd',
+      'WORKFORCE_ISSUES': '#5ec8eb'
+    };
+
+    // If we have real data, use it
+    if (mainCategoryStats?.mainCategoryData) {
+      const realData = mainCategoryStats.mainCategoryData
+        .filter((item: any) => riskCategories.includes(item.name))
+        .map((item: any) => ({
+          name: formatMainCategoryName(item.name),
+          value: item.value,
+          color: colorMap[item.name] || '#9ca3af'
+        }));
+
+      // If we have real data, return it
+      if (realData.length > 0) {
+        return realData;
+      }
     }
 
-    // Default data for all categories
+    // Fallback data when no real data is available
     return [
-      { name: "Market Volatility", value: 32, color: "#f05a5a" },
-      { name: "Competition", value: 28, color: "#f6c652" },
-      { name: "Supply Chain", value: 24, color: "#4a69dd" },
-      { name: "Workforce Issues", value: 16, color: "#5ec8eb" }
+      { name: "Market Volatility", value: 0, color: "#f05a5a" },
+      { name: "Competition", value: 0, color: "#f6c652" },
+      { name: "Supply Chain", value: 0, color: "#4a69dd" },
+      { name: "Workforce Issues", value: 0, color: "#5ec8eb" }
     ];
   };
 
@@ -228,23 +308,38 @@ export default function CategoriesPage() {
 
                             <TabsContent value="regulatory" className="mt-0">
                               <CustomBarChart
-                                  title="Overall Regulatory Impact"
-                                  data={getRegulationData(null)}
+                                  title={selectedCategory ? `${selectedCategory} Regulatory Impact` : "Overall Regulatory Impact"}
+                                  data={getRegulationData()}
                               />
+                              {isLoadingMainCategories && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                                  <div className="text-sm text-gray-500">Loading real data...</div>
+                                </div>
+                              )}
                             </TabsContent>
 
                             <TabsContent value="growth" className="mt-0">
                               <CustomBarChart
-                                  title="Overall Growth Indicators"
-                                  data={getGrowthData(null)}
+                                  title={selectedCategory ? `${selectedCategory} Growth Indicators` : "Overall Growth Indicators"}
+                                  data={getGrowthData()}
                               />
+                              {isLoadingMainCategories && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                                  <div className="text-sm text-gray-500">Loading real data...</div>
+                                </div>
+                              )}
                             </TabsContent>
 
                             <TabsContent value="risk" className="mt-0">
                               <CustomBarChart
-                                  title="Overall Risk Analysis"
-                                  data={getRiskData(null)}
+                                  title={selectedCategory ? `${selectedCategory} Risk Analysis` : "Overall Risk Analysis"}
+                                  data={getRiskData()}
                               />
+                              {isLoadingMainCategories && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                                  <div className="text-sm text-gray-500">Loading real data...</div>
+                                </div>
+                              )}
                             </TabsContent>
                           </Tabs>
                         </CardContent>
@@ -306,22 +401,37 @@ export default function CategoriesPage() {
                             <TabsContent value="regulatory" className="mt-0">
                               <CustomBarChart
                                   title={selectedCategory ? `${selectedCategory} Regulatory Impact` : "Overall Regulatory Impact"}
-                                  data={getRegulationData(selectedCategory)}
+                                  data={getRegulationData()}
                               />
+                              {isLoadingMainCategories && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                                  <div className="text-sm text-gray-500">Loading real data...</div>
+                                </div>
+                              )}
                             </TabsContent>
 
                             <TabsContent value="growth" className="mt-0">
                               <CustomBarChart
                                   title={selectedCategory ? `${selectedCategory} Growth Indicators` : "Overall Growth Indicators"}
-                                  data={getGrowthData(selectedCategory)}
+                                  data={getGrowthData()}
                               />
+                              {isLoadingMainCategories && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                                  <div className="text-sm text-gray-500">Loading real data...</div>
+                                </div>
+                              )}
                             </TabsContent>
 
                             <TabsContent value="risk" className="mt-0">
                               <CustomBarChart
                                   title={selectedCategory ? `${selectedCategory} Risk Analysis` : "Overall Risk Analysis"}
-                                  data={getRiskData(selectedCategory)}
+                                  data={getRiskData()}
                               />
+                              {isLoadingMainCategories && (
+                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                                  <div className="text-sm text-gray-500">Loading real data...</div>
+                                </div>
+                              )}
                             </TabsContent>
                           </Tabs>
                         </CardContent>
