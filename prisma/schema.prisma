@@ -188,14 +188,31 @@ model News {
   @@map("news")
 }
 
+enum MainCategory {
+  POLICY_CHANGES
+  COMPLIANCE
+  LEGAL_UPDATES
+  TAX_REGULATIONS
+  MARKET_EXPANSION
+  NEW_INVESTMENTS
+  INNOVATION
+  PARTNERSHIPS
+  MARKET_VOLATILITY
+  COMPETITION
+  SUPPLY_CHAIN
+  WORKFORCE_ISSUES
+  GENERAL
+}
+
 model SummarizedNews {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  category  String
-  sentiment String // Enum alternative: @db.Enum("Positive", "Neutral", "Negative")
-  date      DateTime
-  url       String
+  id           String       @id @default(uuid())
+  title        String
+  content      String
+  category     String
+  mainCategory MainCategory @default(GENERAL)
+  sentiment    String // Enum alternative: @db.Enum("Positive", "Neutral", "Negative")
+  date         DateTime
+  url          String
 
   @@map("summarized_news")
 }
