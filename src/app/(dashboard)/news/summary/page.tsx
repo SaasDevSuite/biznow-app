@@ -156,7 +156,7 @@ export default function NewsSummary() {
                                                 {new Date(item.date).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                                                <Link href={`/news/article/${item.id}`} className="hover:underline">
+                                                <Link href={`${item.url}`} className="hover:underline">
                                                     Read More
                                                 </Link>
                                             </td>
