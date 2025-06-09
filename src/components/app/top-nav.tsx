@@ -3,7 +3,6 @@ import {ThemeToggle} from "@/components/theme-toggle"
 import {Notifications} from "@/components/notifications"
 import Link from "next/link"
 import {usePathname} from "next/navigation"
-import {useSettings} from "@/contexts/settings-context"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,7 +11,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
+import {Avatar, AvatarFallback} from "@/components/ui/avatar"
 import {Button} from "@/components/ui/button"
 import React, { useEffect, useState } from "react"
 import {signOut, useSession} from "next-auth/react"
@@ -22,7 +21,6 @@ import { Download} from "lucide-react"
 
 export function TopNav() {
     const pathname = usePathname()
-    const {settings} = useSettings()
     const session = useSession()
 
     const [newsContext, setNewsContext] = useState<any>(null)
@@ -102,9 +100,6 @@ export function TopNav() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src={settings.avatar} alt={
-                                        session?.data?.user?.image || "User"
-                                    }/>
                                     <AvatarFallback>
                                         {(session?.data?.user?.name || "User")
                                             .split(" ")
