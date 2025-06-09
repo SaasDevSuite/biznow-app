@@ -243,7 +243,7 @@ export default function LandingPage() {
                       className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6"
                   >
                     <Link href="/sign-up" className="flex items-center gap-2">
-                      Start Free Trial <ArrowRight className="h-5 w-5" />
+                      Sign Up for full access <ArrowRight className="h-5 w-5" />
                     </Link>
                   </Button>
                 </motion.div>
@@ -495,7 +495,7 @@ export default function LandingPage() {
                       <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Button asChild size="lg" variant="secondary" className="text-lg px-8 py-6">
                           <Link href="/sign-up" className="flex items-center gap-2">
-                            Start Free Trial <ArrowRight className="h-5 w-5" />
+                            Sign Up for Free <ArrowRight className="h-5 w-5" />
                           </Link>
                         </Button>
                       </motion.div>
@@ -518,10 +518,6 @@ export default function LandingPage() {
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4" />
                         No credit card required
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4" />
-                        Cancel anytime
                       </div>
                     </div>
                   </div>
