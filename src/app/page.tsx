@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -9,11 +9,10 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Newspaper, TrendingUp, BarChart3, Zap, Shield, Clock, ArrowRight, CheckCircle } from "lucide-react"
-import { motion } from "framer-motion"
-import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { motion, useInView } from "framer-motion"
 import { useCursorAnimation } from "@/hooks/useCursorAnimation"
 import { fetchLatestNews } from "@/actions/news/landing"
+import { UserProfileButton } from "@/components/user-profile-button"
 
 // Add type for news items
 type NewsItem = {
@@ -73,8 +72,14 @@ export default function LandingPage() {
     async function loadNews() {
       try {
         console.log("Fetching latest news...");
+        setIsLoading(true);
         const latestNews = await fetchLatestNews(3);
         console.log("Fetched news:", latestNews);
+
+        if (!latestNews || latestNews.length === 0) {
+          console.log("No news items returned from server action");
+        }
+
         setNewsItems(latestNews || []);
       } catch (error) {
         console.error("Failed to fetch latest news:", error);
@@ -96,7 +101,7 @@ export default function LandingPage() {
     impact: 7.5, // Default impact score
     summary: news.content,
     readTime: `${Math.max(2, Math.ceil(news.content.length / 500))} min read`,
-    trending: Math.random() > 0.7, // Random trending status
+    trending: Math.random() > 0.7,
   }));
 
   // Add fallback news if nothing is returned
@@ -145,20 +150,8 @@ export default function LandingPage() {
             </motion.div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button asChild variant="outline" size="sm">
-                  <Link href="/sign-in">Sign In</Link>
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                    asChild
-                    size="sm"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                >
-                  <Link href="/sign-up">Sign Up</Link>
-                </Button>
-              </motion.div>
+              {/* Check if user is logged in */}
+              <UserProfileButton />
             </div>
           </div>
         </motion.header>
@@ -504,7 +497,7 @@ export default function LandingPage() {
                             asChild
                             size="lg"
                             variant="outline"
-                            className="text-lg px-8 py-6 border-white/20 text-white hover:bg-white/10"
+                            className="text-lg px-8 py-6 border-white/20 text-white hover:bg-white/10 dark:text-white dark:border-white/20 dark:hover:bg-white/10 bg-blue-600/10 border-blue-600/20 hover:bg-blue-600/20"
                         >
                           <Link href="#contact">Contact Sales</Link>
                         </Button>
@@ -604,7 +597,7 @@ export default function LandingPage() {
             </div>
             <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center">
               <div className="text-sm text-muted-foreground mb-4 md:mb-0">
-                © {new Date().getFullYear()} Biznow. All rights reserved.
+                © {new Date().getFullYear()} Syigen Pvt Ltd. All rights reserved.
               </div>
               <div className="flex gap-6 text-sm text-muted-foreground">
                 <Link href="#" className="hover:text-primary transition-colors">
