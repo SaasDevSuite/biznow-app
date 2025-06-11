@@ -178,12 +178,12 @@ model Invoice {
 }
 
 model News {
-  id      String   @id @default(uuid())
-  title   String
-  content String
-  date    DateTime
+  id                String   @id @default(uuid())
+  title             String
+  content           String
+  date              DateTime
   matchedCategories String
-  url     String
+  url               String
 
   @@map("news")
 }
@@ -215,4 +215,12 @@ model SummarizedNews {
   url          String
 
   @@map("summarized_news")
+}
+
+model NewsCache {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  data      Json
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 }
