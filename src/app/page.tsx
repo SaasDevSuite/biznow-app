@@ -597,17 +597,11 @@ export default function LandingPage() {
             </div>
             <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center">
               <div className="text-sm text-muted-foreground mb-4 md:mb-0">
-                © {new Date().getFullYear()} Syigen Pvt Ltd. All rights reserved.
+                ©  {new Date().getFullYear()} Syigen Pvt Ltd. All rights reserved.
               </div>
               <div className="flex gap-6 text-sm text-muted-foreground">
-                <Link href="#" className="hover:text-primary transition-colors">
+                <Link href="/privacy-policy" className="hover:text-primary transition-colors">
                   Privacy Policy
-                </Link>
-                <Link href="#" className="hover:text-primary transition-colors">
-                  Terms of Service
-                </Link>
-                <Link href="#" className="hover:text-primary transition-colors">
-                  Cookie Policy
                 </Link>
               </div>
             </div>
