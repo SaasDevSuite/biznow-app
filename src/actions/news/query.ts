@@ -3,7 +3,6 @@
 import {processNews} from "@/actions/news/operations";
 import {prisma} from "@/prisma";
 
-import redis from "@/lib/redis";
 import {FrequencyData} from "@/components/custom/line-chart";
 
 const CACHE_KEY = "summarized_news";
@@ -15,14 +14,17 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 // Load news data from database instead of external source
 const loadNewsData = async (): Promise<any[]> => {
     try {
-        // Check if news data exists in Redis cache
-        const cachedNews = await redis.get(CACHE_KEY);
-        if (cachedNews) {
-            console.log("🟢 Returning cached news data");
-            return JSON.parse(cachedNews);
+        // Attempt to read cached news from NewsCache table
+        const cachedEntry = await prisma.newsCache.findUnique({
+            where: { key: CACHE_KEY },
+        });
+
+        if (cachedEntry && new Date() < cachedEntry.expiresAt) {
+            console.log("🟢 Returning cached news data from PostgreSQL");
+            return JSON.parse(cachedEntry.data as string);
         }
 
-        // Fetch news from database if not cached
+        // Fetch news from database if not cached or expired
         const newsData = await prisma.news.findMany({
             orderBy: {
                 date: 'desc'
@@ -39,9 +41,21 @@ const loadNewsData = async (): Promise<any[]> => {
             id: newsItem.id
         }));
 
-        // Store fetched data in Redis with expiration of 1 hour
-        await redis.set(CACHE_KEY, JSON.stringify(formattedNewsData), "EX", 3600);
-        console.log("🟡 Cached news data for 1 hour");
+        // Store fetched data in NewsCache with expiration of 1 hour
+        const expiresAt = new Date(Date.now() + 3600 * 1000); // 1 hour from now
+        await prisma.newsCache.upsert({
+            where: { key: CACHE_KEY },
+            update: {
+                data: formattedNewsData,
+                expiresAt: expiresAt,
+            },
+            create: {
+                key: CACHE_KEY,
+                data: formattedNewsData,
+                expiresAt: expiresAt,
+            },
+        });
+        console.log("🟡 Cached news data in PostgreSQL for 1 hour");
 
         return formattedNewsData;
     } catch (error) {
@@ -62,8 +76,10 @@ export const processAllNews = async () => {
             await processNews(newsItem);
 
             // Clear cache when new data is processed
-            await redis.del(CACHE_KEY);
-            console.log("🗑️ News cache invalidated");
+            await prisma.newsCache.deleteMany({
+                where: { key: CACHE_KEY },
+            });
+            console.log("🗑️ News cache invalidated in PostgreSQL");
 
             // Delay the next API call by 5 seconds (5000ms)
             await delay(5000); // Delay in milliseconds (5000ms = 5 seconds)
