@@ -64,51 +64,55 @@ export default function ContactPage() {
               </div>
               
               {/* Contact Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <motion.div 
+              <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+                <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl p-6 text-white shadow-lg flex flex-col items-center"
                 >
                   <MessageSquare className="h-10 w-10 mb-4" />
                   <h2 className="text-xl font-bold mb-2">General Inquiries</h2>
-                  <a href="mailto:info@syigen.com" className="text-white hover:underline">
-                    hello@syigen.com
-                  </a>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl p-6 text-white shadow-lg flex flex-col items-center"
                 >
                   <MessageSquare className="h-10 w-10 mb-4" />
                   <h2 className="text-xl font-bold mb-2">Support</h2>
-                  <a href="mailto:info@syigen.com" className="text-white hover:underline">
-                    support@syigen.com
-                  </a>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl p-6 text-white shadow-lg flex flex-col items-center"
                 >
                   <Shield className="h-10 w-10 mb-4" />
                   <h2 className="text-xl font-bold mb-2">Privacy Requests</h2>
-                  <a href="mailto:info@syigen.com" className="text-white hover:underline">
-                    privacy@syigen.com
-                  </a>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   whileHover={{ y: -5 }}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl p-6 text-white shadow-lg flex flex-col items-center"
                 >
                   <Scale className="h-10 w-10 mb-4" />
                   <h2 className="text-xl font-bold mb-2">Legal & Terms</h2>
-                  <a href="mailto:info@syigen.com" className="text-white hover:underline">
-                    legal@syigen.com
-                  </a>
                 </motion.div>
               </div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 p-6 rounded-xl shadow-lg text-white mx-auto max-w-md relative z-10"
+              >
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-black p-3 rounded-full shadow-lg">
+                  <Mail className="h-8 w-8 text-blue-600" />
+                </div>
+                <div className="text-center pt-6">
+                  <a href="mailto:info@syigen.com" className="text-white text-lg font-bold underline">
+                    info@syigen.com
+                  </a>
+                </div>
+              </motion.div>
               
               {/* Social Media */}
               <div className="mt-12 text-center">
