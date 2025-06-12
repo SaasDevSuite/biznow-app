@@ -3,7 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import {motion} from "framer-motion"
-import {ArrowLeft, Facebook, Github, Linkedin, Mail, MessageSquare, Scale, Shield} from "lucide-react"
+import {ArrowLeft, Facebook, Linkedin, Mail, MessageSquare, Scale, Shield} from "lucide-react"
 import {Button} from "@/components/ui/button"
 import {ThemeToggle} from "@/components/theme-toggle"
 
