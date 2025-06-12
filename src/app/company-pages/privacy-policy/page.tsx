@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
                                     Third-Party APIs
                                 </h2>
                                 <p className="text-muted-foreground">
-                                    We connect to external AI providers (e.g., GROUQ, TensorFlow) for news analysis. Your
+                                    We connect to external AI providers (e.g., GROQ, TensorFlow) for news analysis. Your
                                     data is securely routed through these APIs.
                                 </p>
                             </div>
