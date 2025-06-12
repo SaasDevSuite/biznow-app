@@ -121,15 +121,6 @@ export default function ContactPage() {
                 </p>
                 <div className="flex justify-center gap-6">
                   <motion.a 
-                    href="https://github.com/SaasDevSuite/biznow-app"
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    whileHover={{ y: -5 }}
-                    className="bg-emerald-500 p-3 rounded-lg text-white"
-                  >
-                    <Github className="h-6 w-6" />
-                  </motion.a>
-                  <motion.a 
                     href="https://www.linkedin.com/company/syigen-ltd/posts/?feedView=all"
                     target="_blank" 
                     rel="noopener noreferrer"
