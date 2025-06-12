@@ -86,7 +86,7 @@ export default function AboutUsPage() {
                         >
                             <h2 className="text-2xl font-bold mb-4">Our Vision</h2>
                             <p>
-                                To create the most intuitive and powerful AI interface that empowers everyone to harness
+                                To create the most intuitive and powerful interface that empowers everyone to harness
                                 the full potential of business intelligence and stay ahead of market trends.
                             </p>
                         </motion.div>
@@ -97,8 +97,8 @@ export default function AboutUsPage() {
                         >
                             <h2 className="text-2xl font-bold mb-4">Our Values</h2>
                             <p>
-                                Transparency, user privacy, and creating tools that augment human decision-making rather
-                                than replace it. We believe in ethical AI that serves people.
+                                Transparency, user privacy, and creating tools that making human decision-making far
+                                more easier. We believe in ethical AI that serves people.
                             </p>
                         </motion.div>
 

@@ -82,16 +82,6 @@ export default function TermsPage() {
 
                             <div>
                                 <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-2">
-                                    AI Responses
-                                </h2>
-                                <p className="text-muted-foreground">
-                                    The AI models Biznow connects to are third-party services (e.g., Hugging face ).
-                                    Biznow is not liable for the content or accuracy of AI-generated responses.
-                                </p>
-                            </div>
-
-                            <div>
-                                <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-2">
                                     Termination
                                 </h2>
                                 <p className="text-muted-foreground">
