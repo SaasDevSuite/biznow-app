@@ -21,7 +21,7 @@ export function startNewsScheduler(): void {
 
     console.log("Setting up news scheduler...");
 
-    currentSchedulerJob = schedule.scheduleJob('*/5 * * * *', async function() {
+    currentSchedulerJob = schedule.scheduleJob('0 * * * *', async function() {
         console.log("💻💻 Running the scraping job...💻💻");
 
         try {
@@ -33,7 +33,7 @@ export function startNewsScheduler(): void {
             console.error("Cron job error:", error);
         }
     });
-    console.log("News scraping job scheduled to run every 5 minutes!");
+    console.log("News scraping job scheduled to run every hour!");
 }
 
 export function stopNewsScheduler(): void {
