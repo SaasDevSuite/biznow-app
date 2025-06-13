@@ -12,6 +12,8 @@ import {
     Menu,
     Settings,
     UsersIcon,
+    Clock,
+    LucideIcon
 } from "lucide-react"
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
@@ -22,6 +24,7 @@ const navigation = [
     {name: "Subscriptions", href: "/admin/subscriptions", icon: UsersIcon},
     {name: "Invoices", href: "/admin/invoice", icon: ListChecksIcon},
     {name: "Plans", href: "/admin/plan", icon: BadgeDollarSignIcon},
+    {name: "Scheduler" , href:"/admin/scheduler" ,icon: Clock}
 ]
 
 const bottomNavigation = [
