@@ -1,3 +1,5 @@
+'use client';
+
 import {Suspense} from "react"
 import {UserTable} from "@/components/admin/user-table"
 import {Skeleton} from "@/components/ui/skeleton"
