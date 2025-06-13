@@ -21,7 +21,7 @@ const loadNewsData = async (): Promise<any[]> => {
 
         if (cachedEntry && new Date() < cachedEntry.expiresAt) {
             console.log("🟢 Returning cached news data from PostgreSQL");
-            return JSON.parse(cachedEntry.data as string);
+            return cachedEntry.data as any[]; // Prisma typically handles Json deserialization
         }
 
         // Fetch news from database if not cached or expired
