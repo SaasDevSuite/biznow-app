@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -68,7 +68,7 @@ export default function SchedulerPage() {
                         <h3 className="text-lg font-medium">Scheduler Status</h3>
                         <p className="text-sm text-muted-foreground">
                             {isSchedulerRunning ? (
-                                "The news scraping scheduler is currently active and running every 5 minutes."
+                                "The news scraping scheduler is currently active and running every hour"
                             ) : (
                                 "The news scraping scheduler is currently paused. No new scraping tasks will be initiated."
                             )}
