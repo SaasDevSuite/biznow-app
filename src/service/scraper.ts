@@ -453,6 +453,7 @@ async function saveArticleToDB(article: NewsArticle) {
 
 export async function scrapeAndStoreNews() {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const meepuraConfig: SiteConfig = {
             name: "meepura",
             baseUrl: "https://www.meepura.com/english/",
@@ -460,7 +461,7 @@ export async function scrapeAndStoreNews() {
             articleSelector: "article"
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         const deranaConfig: SiteConfig = {
             name: "derana",
             baseUrl: "https://www.adaderana.lk/hot-news/",
@@ -471,7 +472,7 @@ export async function scrapeAndStoreNews() {
         // Connect to the database before scraping
         await prisma.$connect();
 
-        const result = await scrapeAndProcessNews(meepuraConfig, 5);
+        const result = await scrapeAndProcessNews(deranaConfig, 5);
 
         // Disconnect from the database when done
         await prisma.$disconnect();
