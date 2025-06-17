@@ -69,21 +69,59 @@ export default function LandingPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        let retryCount = 0;
+        const maxRetries = 3;
+        
         async function loadNews() {
             try {
-                console.log("Fetching latest news...");
+                const cachedNews = localStorage.getItem('landingPageNews');
+                const cachedTimestamp = localStorage.getItem('landingPageNewsTimestamp');
+                const cacheExpiry = 30 * 60 * 1000;
+
+                if (cachedNews && cachedTimestamp && 
+                    (Date.now() - parseInt(cachedTimestamp)) < cacheExpiry) {
+                    console.log("Using cached news from localStorage");
+                    setNewsItems(JSON.parse(cachedNews));
+                    setIsLoading(false);
+                    return;
+                }
+                
+                console.log(`Fetching latest news... (Attempt ${retryCount + 1}/${maxRetries + 1})`);
                 setIsLoading(true);
                 const latestNews = await fetchLatestNews(3);
                 console.log("Fetched news:", latestNews);
 
                 if (!latestNews || latestNews.length === 0) {
                     console.log("No news items returned from server action");
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        console.log(`Retrying in 2 seconds... (${retryCount}/${maxRetries})`);
+                        setTimeout(loadNews, 2000);
+                        return;
+                    }
                 }
 
+                // Save to state and localStorage
                 setNewsItems(latestNews || []);
+                localStorage.setItem('landingPageNews', JSON.stringify(latestNews || []));
+                localStorage.setItem('landingPageNewsTimestamp', Date.now().toString());
             } catch (error) {
                 console.error("Failed to fetch latest news:", error);
-                setNewsItems([]);
+                
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    console.log(`Retrying after error in 2 seconds... (${retryCount}/${maxRetries})`);
+                    setTimeout(loadNews, 2000);
+                    return;
+                }
+
+                const cachedNews = localStorage.getItem('landingPageNews');
+                if (cachedNews) {
+                    console.log("Using expired cached news due to fetch error");
+                    setNewsItems(JSON.parse(cachedNews));
+                } else {
+                    setNewsItems([]);
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -109,13 +147,35 @@ export default function LandingPage() {
     const displayNews = transformedNews.length > 0 ? transformedNews : [
         {
             id: "fallback-1",
-            title: "No news available at the moment",
+            title: "Loading the latest business news...",
             category: "GENERAL",
             sentiment: "Neutral",
             impact: 5.0,
-            summary: "Please check back later for the latest business news and insights.",
+            summary: "If you're seeing this message for more than a few seconds, there might be an issue with our news service. Please refresh the page or check back later.",
             readTime: "1 min read",
             trending: false,
+            url: "",
+        },
+        {
+            id: "fallback-2",
+            title: "Stay tuned for business updates",
+            category: "GENERAL",
+            sentiment: "Neutral",
+            impact: 5.0,
+            summary: "Our AI-powered system continuously scans thousands of sources to bring you the most relevant business news.",
+            readTime: "1 min read",
+            trending: false,
+            url: "",
+        },
+        {
+            id: "fallback-3",
+            title: "Business intelligence at your fingertips",
+            category: "GENERAL",
+            sentiment: "Positive",
+            impact: 5.0,
+            summary: "Sign up to get personalized news alerts, sentiment analysis, and market impact scores delivered to your inbox.",
+            readTime: "1 min read",
+            trending: true,
             url: "",
         }
     ];
@@ -274,7 +334,7 @@ export default function LandingPage() {
                     </div>
                 </section>
 
-                {/* Enhanced News Preview Section */}
+                {/* News Preview Section */}
                 <AnimatedSection>
                     <section id="news-preview" className="py-20 bg-gradient-to-b from-muted/30 to-background">
                         <div className="container mx-auto px-4">
